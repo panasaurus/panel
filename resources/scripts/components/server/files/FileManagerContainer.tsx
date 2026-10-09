@@ -193,8 +193,7 @@ const FileManagerContainer = () => {
                                                         }}
                                                     >
                                                         <FileObjectRow
-                                                            // @ts-expect-error - Legacy type suppression
-                                                            file={filesArray[item.index]}
+                                                            file={filesArray[item.index]!}
                                                             key={filesArray[item.index]?.name}
                                                         />
                                                     </div>
