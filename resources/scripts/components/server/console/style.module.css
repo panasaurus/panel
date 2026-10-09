@@ -1,52 +1,58 @@
-@import '../../../assets/tailwind.css';
+@reference '../../../assets/tailwind.css';
 
-.stat_block {
+.console_stat_block {
     @apply relative flex w-full items-center rounded-xl shadow-lg;
     /* @apply col-span-3 md:col-span-2 lg:col-span-6; */
-    @apply p-8;
 
-    & > .status_bar {
-        @apply absolute top-0 left-0 h-full w-1 rounded-l sm:hidden;
-    }
+    &.status_bar {
+        @apply p-8;
 
-    & > .icon {
-        @apply hidden h-12 w-12 shrink-0 items-center justify-center rounded-lg shadow-md;
-        @apply transition-colors duration-500;
-        @apply sm:mr-4 sm:flex;
+        & > div {
+            @apply absolute top-0 left-0 h-full w-1 rounded-l sm:hidden;
+        }
 
-        & > svg {
-            @apply m-auto h-6 w-6;
+        & > .status_icon {
+            @apply hidden h-12 w-12 shrink-0 items-center justify-center rounded-lg shadow-md;
+            @apply transition-colors duration-500;
+            @apply sm:mr-4 sm:flex;
+
+            & > svg {
+                @apply m-auto h-6 w-6;
+            }
         }
     }
 }
 
-.terminal {
+.terminal_container {
     @apply relative flex h-full w-full flex-col;
 
-    & > .terminalContainer {
+    & > div:first-child {
         @apply h-full min-h-[453px] rounded-t-xl border-x-[1px] border-t-[1px] border-[#ffffff11] bg-[#131313] pt-8 pl-8 font-mono text-sm;
 
-        & #terminal {
+        & > div {
             @apply h-full w-full;
+        }
 
-            &::-webkit-scrollbar-track {
-                @apply w-2;
-            }
+        & .xterm-viewport::-webkit-scrollbar {
+            @apply w-2;
+        }
 
-            &::-webkit-scrollbar-thumb {
-                @apply bg-zinc-900;
-            }
+        & .xterm-viewport::-webkit-scrollbar-thumb {
+            @apply bg-zinc-900;
         }
     }
 
-    & .command_icon {
+    & > div.command_icon {
         @apply absolute top-0 left-0 z-10 flex h-full items-center px-3 transition-colors duration-100 select-none;
     }
 
-    & .command_input {
+    & > div:last-child {
         @apply relative w-full rounded-b-xl border-x-[1px] border-b-[1px] border-[#ffffff11] bg-[#131313] px-4 pt-2 pr-4 pb-6 pl-8 font-mono text-sm text-zinc-100;
-        @apply outline-hidden focus:ring-0 focus-visible:outline-none;
-        @apply focus:border-b-blue-500 active:border-b-blue-500;
+
+        & > input {
+            @apply outline-hidden focus:ring-0 focus-visible:outline-none;
+            @apply focus:border-b-blue-500 active:border-b-blue-500;
+        }
     }
 }
 

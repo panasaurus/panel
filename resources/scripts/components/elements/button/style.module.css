@@ -1,2 +1,1 @@
-/* @import "../../../../scripts/assets/tailwind.css'; */
-@import '../../../assets/tailwind.css'
+@reference '../../../assets/tailwind.css';

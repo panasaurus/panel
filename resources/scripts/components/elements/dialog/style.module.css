@@ -1,12 +1,11 @@
-@import '../../../assets/tailwind.css';
+@reference '../../../assets/tailwind.css';
 
-.dialogContainer {
+.container {
     @apply flex min-h-full items-center justify-center p-4 text-center;
 }
 
 .panel {
     @apply relative mx-auto w-full max-w-xl rounded-2xl border-[1px] border-[#ffffff07] text-left shadow-2xl backdrop-blur-3xl;
-    background: linear-gradient(0deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), rgba(255, 255, 255, 0.12);
 }
 
 .title {
@@ -17,7 +16,7 @@
     @apply h-5 w-5 transition-transform duration-100 group-hover:rotate-90;
 }
 
-.dialog_icon {
+.icon_container {
     @apply mr-4 flex h-10 w-10 items-center justify-center rounded-full;
 
     &.danger {

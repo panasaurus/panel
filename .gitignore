@@ -59,3 +59,6 @@ shims.d.ts
 !.env.vault
 .craft.yml
 .gz
+
+*.sqlite
+/public/hot

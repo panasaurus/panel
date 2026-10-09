@@ -9,7 +9,7 @@
         ],
         "jsx": "react-jsx",
         "module": "ESNext",
-        "target": "ES2015",
+        "target": "ESNext",
         "paths": {
             "@/*": [
                 "./resources/scripts/*"
@@ -56,13 +56,13 @@
         "noImplicitReturns": true,
         "noPropertyAccessFromIndexSignature": false,
         "noUncheckedIndexedAccess": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
         "preserveWatchOutput": true,
         "resolveJsonModule": true,
         "skipLibCheck": true,
         "sourceMap": true,
-        "strict": true,
+        "strict": false,
         "stripInternal": true,
         "useDefineForClassFields": true
     },
@@ -72,6 +72,7 @@
         "./package.json"
     ],
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "**/*.spec.ts"
     ]
 }

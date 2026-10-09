@@ -273,7 +273,7 @@ const SoftwareContainer = () => {
         return foundNest?.attributes?.relationships?.eggs?.data?.find((egg) => egg?.attributes?.uuid === currentEgg)
             ?.attributes?.name;
     }, [nests, currentEgg]);
-    const backupLimit = serverData?.featureLimits.backups;
+    const backupLimit = serverData?.featureLimits?.backups;
 
     const { data: backups } = getServerBackups();
     const setServerFromState = ServerContext.useStoreActions((actions) => actions.server.setServerFromState);
@@ -337,7 +337,7 @@ const SoftwareContainer = () => {
 
     // Initialize backup setting based on limits
     useEffect(() => {
-        if (backups) {
+        if (backups && backupLimit !== undefined) {
             // null = unlimited, 0 = disabled, positive number = cap
             setShouldBackup(backupLimit !== 0 && (backupLimit === null || backups.backupCount < backupLimit));
         }
@@ -389,7 +389,7 @@ const SoftwareContainer = () => {
         setEggPreview(null);
         setPendingVariables({});
         setVariableErrors({});
-        setShouldBackup(backupLimit !== 0 && (backupLimit === null || (backups?.backupCount || 0) < backupLimit));
+        setShouldBackup(backupLimit !== undefined && backupLimit !== 0 && (backupLimit === null || (backups?.backupCount || 0) < backupLimit));
         setShouldWipe(false);
         setCustomStartup('');
         setSelectedDockerImage('');
@@ -947,7 +947,7 @@ const SoftwareContainer = () => {
                                             Create Backup
                                         </label>
                                         <p className='text-xs text-neutral-400 leading-relaxed'>
-                                            {backupLimit !== 0 &&
+                                            {backupLimit !== undefined && backupLimit !== 0 &&
                                             (backupLimit === null || (backups?.backupCount || 0) < backupLimit)
                                                 ? 'Automatically create a backup before applying changes'
                                                 : backupLimit === 0
@@ -961,7 +961,7 @@ const SoftwareContainer = () => {
                                             onCheckedChange={setShouldBackup}
                                             disabled={
                                                 backupLimit === 0 ||
-                                                (backupLimit !== null && (backups?.backupCount || 0) >= backupLimit)
+                                                (backupLimit !== undefined && backupLimit !== null && (backups?.backupCount || 0) >= backupLimit)
                                             }
                                         />
                                     </div>

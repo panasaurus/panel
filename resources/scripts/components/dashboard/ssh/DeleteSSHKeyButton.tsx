@@ -1,5 +1,4 @@
-import { faTrashAlt } from '@fortawesome/free-solid-svg-icons';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { TrashBin } from '@gravity-ui/icons';
 import { useState } from 'react';
 
 import Code from '@/components/elements/Code';
@@ -41,7 +40,7 @@ const DeleteSSHKeyButton = ({ name, fingerprint }: { name: string; fingerprint: 
                 className='p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all duration-150'
                 onClick={() => setVisible(true)}
             >
-                <FontAwesomeIcon icon={faTrashAlt} size='lg' />
+                <TrashBin width={20} height={20} fill='currentColor' />
             </button>
         </>
     );

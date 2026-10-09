@@ -13,6 +13,17 @@ class MigrateSettingsTableToNewFormat extends Migration
   public function up(): void
   {
     DB::table('settings')->truncate();
+
+    if (DB::getDriverName() === 'sqlite') {
+      Schema::drop('settings');
+      Schema::create('settings', function (Blueprint $table) {
+        $table->increments('id');
+        $table->string('key')->unique();
+        $table->text('value');
+      });
+      return;
+    }
+
     Schema::table('settings', function (Blueprint $table) {
       $table->increments('id')->first();
     });
