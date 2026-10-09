@@ -49,6 +49,11 @@ RUN apk add --no-cache --virtual .build-deps \
         ca-certificates \
         curl \
         git \
+        libpng \
+        libxml2 \
+        libzip \
+        oniguruma \
+        postgresql-libs \
         supervisor \
         nginx \
         dcron \
@@ -70,8 +75,6 @@ RUN { \
     echo "opcache.max_accelerated_files=32531"; \
     echo "opcache.validate_timestamps=0"; \
     echo "opcache.save_comments=1"; \
-    echo "opcache.preload=/app/preload.php"; \
-    echo "opcache.preload_user=nginx"; \
     echo "opcache.jit=tracing"; \
     echo "opcache.jit_buffer_size=64M"; \
     echo "realpath_cache_size=4096K"; \
