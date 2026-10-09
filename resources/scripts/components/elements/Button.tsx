@@ -12,7 +12,7 @@ interface Props {
 
 const ButtonStyle = styled.button<Omit<Props, 'isLoading'>>``;
 
-type ComponentProps = Omit<JSX.IntrinsicElements['button'], 'ref' | keyof Props> & Props;
+type ComponentProps = Omit<React.JSX.IntrinsicElements['button'], 'ref' | keyof Props> & Props;
 
 const Button: React.FC<ComponentProps> = ({ children, isLoading, ...props }) => (
     <ButtonStyle {...props}>
@@ -32,7 +32,7 @@ const Button: React.FC<ComponentProps> = ({ children, isLoading, ...props }) => 
     </ButtonStyle>
 );
 
-type LinkProps = Omit<JSX.IntrinsicElements['a'], 'ref' | keyof Props> & Props;
+type LinkProps = Omit<React.JSX.IntrinsicElements['a'], 'ref' | keyof Props> & Props;
 
 const LinkButton: React.FC<LinkProps> = (props) => <ButtonStyle as={'a'} {...props} />;
 

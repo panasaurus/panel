@@ -5,7 +5,7 @@ import { NavLink, useParams } from 'react-router-dom';
 import { ServerContext } from '@/state/server';
 
 interface Props {
-    renderLeft?: JSX.Element;
+    renderLeft?: React.JSX.Element;
     withinFileEditor?: boolean;
     isNewFile?: boolean;
 }

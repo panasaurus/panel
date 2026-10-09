@@ -64,11 +64,11 @@ const Dialog = ({
                 <DialogContext.Provider value={{ setIcon, setFooter, setIconPosition }}>
                     <HDialog
                         static
-                        as={motion.div}
+                        as={motion.div as any}
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 0.15 }}
+                        transition={{ duration: 0.15 } as any}
                         open={open}
                         onClose={onDialogClose}
                     >
@@ -87,11 +87,11 @@ const Dialog = ({
                                 onMouseUp={onContainerClick.bind(this, false)}
                             >
                                 <HDialog.Panel
-                                    as={motion.div}
+                                    as={motion.div as any}
                                     initial={'closed'}
                                     animate={down ? 'bounce' : 'open'}
                                     exit={'closed'}
-                                    variants={variants}
+                                    variants={variants as any}
                                     className={styles.panel}
                                 >
                                     <div className={'flex p-6 pb-0 overflow-y-auto'}>

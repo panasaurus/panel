@@ -106,12 +106,12 @@ function LoginCheckpointForm() {
     );
 }
 
-const EnhancedForm = withFormik<Props & { location: Location }, Values>({
+const EnhancedForm = withFormik<Props & { location: any }, Values>({
     handleSubmit: ({ code, recoveryCode }, { setSubmitting, props: { clearAndAddHttpError, location } }) => {
         loginCheckpoint(location.state?.token || '', code, recoveryCode)
             .then((response) => {
                 if (response.complete) {
-                    window.location = response.intended || '/';
+                    window.location.href = response.intended || '/';
                     return;
                 }
 

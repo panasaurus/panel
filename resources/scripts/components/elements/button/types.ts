@@ -16,7 +16,7 @@ export enum Variant {
 
 export const Options = { Shape, Size, Variant };
 
-export type ButtonProps = JSX.IntrinsicElements['button'] & {
+export type ButtonProps = React.JSX.IntrinsicElements['button'] & {
     shape?: Shape;
     size?: Size;
     variant?: Variant;
