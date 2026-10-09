@@ -1,0 +1,61 @@
+# ----------------------------------------------------------------------------
+# Panasaurus
+# ----------------------------------------------------------------------------
+/vendor/
+node_modules/
+/public/build/
+/public/assets/manifest.json
+
+# Environment & secrets
+.env
+.env.backup
+.env.*.backup
+.phpunit.result.cache
+
+# Application state (created at runtime)
+/.panasaurus_bootstrapped
+/storage/logs/*
+/storage/framework/cache/data/*
+/storage/framework/sessions/*
+/storage/framework/views/*
+/storage/app/public/*
+/storage/backups/
+/bootstrap/cache/*.php
+.phpactor.json
+.phpunit.cache
+
+# Blueprint runtime state (extensions get installed into .blueprint at runtime;
+# the pre-installed framework itself IS tracked — keep .blueprint/extensions
+# contents out except the bundled blueprint core)
+.blueprint/extensions/*
+!.blueprint/extensions/blueprint/
+.blueprint/tmp/
+.blueprint/dist/*
+.blueprint/dev/*
+.blueprint/debug/
+
+# JS/TS artifacts
+*.tsbuildinfo
+.eslintcache
+coverage/
+
+# Editor & OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Misc
+*.log
+.DS_Store
+shims.d.ts
+.docusaurus
+.cache-loader
+.npm
+.eslintcache
+.yarn
+.flaskenv*
+!.env.project
+!.env.vault
+.craft.yml
+.gz

@@ -1,0 +1,17 @@
+@import '../../../assets/tailwind.css';
+
+.icons {
+    @apply mx-2 flex space-x-1 text-zinc-400 transition-colors duration-100;
+
+    & svg {
+        @apply h-5 w-auto cursor-pointer px-1 py-px hover:text-zinc-50;
+    }
+}
+
+.description {
+    @apply mt-1 pr-4 text-sm break-words;
+
+    & strong {
+        @apply font-semibold break-all text-zinc-50;
+    }
+}

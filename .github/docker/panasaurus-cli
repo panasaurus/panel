@@ -1,0 +1,14 @@
+#!/bin/bash
+# ----------------------------------------------------------------------------
+# Panasaurus CLI — manages extensions via the built-in Blueprint framework.
+# Installed at /usr/local/bin/panasaurus inside the Panasaurus container.
+# ----------------------------------------------------------------------------
+export BLUEPRINT__FOLDER="/app"
+export FOLDER="/app"
+
+if [ ! -f "/app/blueprint.sh" ]; then
+    echo "Panasaurus: blueprint.sh not found at /app/blueprint.sh" >&2
+    exit 1
+fi
+
+exec bash /app/blueprint.sh -bash "$@"

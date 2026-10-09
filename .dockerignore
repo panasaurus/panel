@@ -1,0 +1,28 @@
+# Build context exclusions for the Panasaurus image.
+# (Only used by Docker builds; tracked files stay in git.)
+
+# Local state
+.git
+node_modules
+vendor
+public/build
+data
+.env
+.env.*
+*.log
+
+# Dev-only tooling not needed inside the image
+tests
+vagrant
+Vagrantfile
+nix
+docs
+.phpunit.result.cache
+.phpunit.cache
+phpstan.neon
+phpunit.xml
+.dockerignore
+.gitignore
+
+# Node sources are compiled in stage 1; sources still needed for Blueprint
+# extension rebuilds inside the container, so resources/ stays included.

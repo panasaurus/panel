@@ -1,0 +1,13 @@
+#!/bin/bash
+#
+# Panasaurus CLI shortcut (Blueprint core)
+# Runs the built-in Blueprint framework inside the Panasaurus panel.
+
+if [ -t 0 ] && [ "$(id -u)" != "0" ] && [ -x "$(command -v sudo)" ]; then
+  exec sudo -s /usr/local/bin/panasaurus "$@"
+fi
+
+export BLUEPRINT__FOLDER="${BLUEPRINT__FOLDER:-/app}"
+
+# Run Blueprint core command
+bash "$BLUEPRINT__FOLDER/blueprint.sh" -bash "${@}"

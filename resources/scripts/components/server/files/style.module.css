@@ -1,0 +1,38 @@
+@import '../../../assets/tailwind.css';
+
+.manager_actions {
+    @apply mb-4 grid w-full grid-cols-2 gap-4 sm:grid-cols-3;
+
+    & button {
+        @apply w-full first:col-span-2 sm:first:col-span-1;
+    }
+
+    @screen md {
+        @apply mb-0 flex flex-1 justify-end;
+
+        & button {
+            @apply w-auto;
+        }
+    }
+}
+
+.file_row {
+    @apply flex items-center border-[1px] border-[#ffffff07] bg-[#ffffff08] p-1 text-sm no-underline transition first:rounded-t-sm last:rounded-b-sm;
+    @apply hover:bg-[#ffffff12] hover:duration-0;
+
+    & > .details {
+        @apply flex flex-1 items-center truncate overflow-hidden px-4 py-2 text-zinc-300 no-underline;
+
+        &:not(a) {
+            @apply cursor-default;
+        }
+    }
+
+    &[data-state='open'] {
+        @apply bg-[#ffffff12];
+    }
+
+    &:has(button[data-state='checked']) {
+        @apply bg-[#2a2021];
+    }
+}

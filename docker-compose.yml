@@ -1,0 +1,84 @@
+# ----------------------------------------------------------------------------
+# Panasaurus Panel — production compose file
+#
+#   cp .env.compose.example .env   (optional, otherwise interactive defaults)
+#   docker compose up -d
+#
+# The panel image ships with the Blueprint extension framework pre-installed.
+# Manage extensions with:  docker compose exec panel panasaurus -help
+# ----------------------------------------------------------------------------
+
+x-common:
+    database: &db-environment
+        MYSQL_PASSWORD: &db-password 'CHANGE_ME_PLEASE'
+        MYSQL_ROOT_PASSWORD: 'CHANGE_ME_TOO_PLEASE'
+    panel: &panel-environment
+        APP_URL: 'http://localhost'
+        APP_TIMEZONE: 'UTC'
+        APP_SERVICE_AUTHOR: 'no-reply@panasaurus.dev'
+
+services:
+    database:
+        image: mariadb:11
+        restart: unless-stopped
+        command: --default-authentication-plugin=mysql_native_password
+        healthcheck:
+            test: ['CMD', 'healthcheck.sh', '--connect', '--innodb_initialized']
+            interval: 10s
+            timeout: 5s
+            retries: 6
+        volumes:
+            - './data/database:/var/lib/mysql'
+        environment:
+            <<: *db-environment
+            MYSQL_DATABASE: 'panasaurus'
+            MYSQL_USER: 'panasaurus'
+
+    cache:
+        image: redis:7-alpine
+        restart: unless-stopped
+        healthcheck:
+            test: ['CMD', 'redis-cli', 'ping']
+            interval: 10s
+            timeout: 5s
+            retries: 6
+
+    panel:
+        image: ghcr.io/panasaurus/panel:latest
+        restart: unless-stopped
+        depends_on:
+            database:
+                condition: service_healthy
+            cache:
+                condition: service_healthy
+        ports:
+            - '${PANEL_PORT:-80}:80'
+            # - '443:443'
+        links:
+            - database
+            - cache
+        volumes:
+            - './data/var:/app/var'
+            - './data/logs:/app/storage/logs'
+            - './data/extensions:/app/.blueprint/extensions'
+            - './data/nginx:/etc/nginx/http.d'
+            - './data/certs:/etc/letsencrypt'
+        environment:
+            <<: *panel-environment
+            APP_ENV: 'production'
+            APP_ENVIRONMENT_ONLY: 'false'
+            CACHE_DRIVER: 'redis'
+            SESSION_DRIVER: 'redis'
+            QUEUE_CONNECTION: 'redis'
+            REDIS_HOST: 'cache'
+            DB_CONNECTION: 'mariadb'
+            DB_HOST: 'database'
+            DB_PORT: '3306'
+            DB_DATABASE: 'panasaurus'
+            DB_USERNAME: 'panasaurus'
+            DB_PASSWORD: *db-password
+            HASHIDS_LENGTH: 8
+            # First-boot admin bootstrap (optional but recommended):
+            # PANASAURUS_ADMIN_EMAIL: 'you@example.com'
+            # PANASAURUS_ADMIN_USERNAME: 'admin'
+            # PANASAURUS_ADMIN_PASSWORD: 'change-me-please'
