@@ -11,7 +11,7 @@ import getServerResourceUsage, { ServerPowerState, ServerStats } from '@/api/ser
 // than the more faded default style.
 const isAlarmState = (current: number, limit: number): boolean => limit > 0 && current / (limit * 1024 * 1024) >= 0.9;
 
-const StatusIndicatorBox = styled.div<{ $status: ServerPowerState }>`
+const StatusIndicatorBox = styled.div<{ $status?: ServerPowerState }>`
     background: #ffffff11;
     border: 1px solid #ffffff12;
     transition: all 250ms ease-in-out;

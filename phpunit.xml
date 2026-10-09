@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd" bootstrap="bootstrap/tests.php" colors="true">
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/10.5/phpunit.xsd" bootstrap="bootstrap/tests.php" colors="true" failOnRisky="false">
   <testsuites>
     <testsuite name="Integration">
       <directory>./tests/Integration</directory>
@@ -15,7 +15,7 @@
     <env name="BCRYPT_ROUNDS" value="4"/>
     <env name="CACHE_STORE" value="array"/>
     <env name="DB_CONNECTION" value="sqlite"/>
-    <env name="DB_DATABASE" value="/app/database/testing.sqlite"/>
+    <env name="DB_DATABASE" value="database/testing.sqlite"/>
     <env name="MAIL_MAILER" value="array"/>
     <env name="SESSION_DRIVER" value="array"/>
     <env name="QUEUE_CONNECTION" value="sync"/>

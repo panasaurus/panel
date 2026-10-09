@@ -25,7 +25,7 @@ function Pagination<T>({ data: { items, pagination }, onPageSelect, children }: 
     const isFirstPage = pagination.currentPage === 1;
     const isLastPage = pagination.currentPage >= pagination.totalPages;
 
-    const pages = [];
+    const pages: number[] = [];
 
     // Start two spaces before the current page. If that puts us before the starting page default
     // to the first page as the starting point.

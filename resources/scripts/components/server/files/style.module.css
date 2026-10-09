@@ -1,16 +1,16 @@
 @reference '../../../assets/tailwind.css';
 
-.actions {
+.manager_actions {
     @apply mb-4 grid w-full grid-cols-2 gap-4 sm:grid-cols-3;
 
-    & > div {
+    & button {
         @apply w-full first:col-span-2 sm:first:col-span-1;
     }
 
-    & > div:last-child {
+    @screen md {
         @apply mb-0 flex flex-1 justify-end;
 
-        & > button {
+        & button {
             @apply w-auto;
         }
     }
@@ -18,24 +18,21 @@
 
 .file_row {
     @apply flex items-center border-[1px] border-[#ffffff07] bg-[#ffffff08] p-1 text-sm no-underline transition first:rounded-t-sm last:rounded-b-sm;
+    @apply hover:bg-[#ffffff12] hover:duration-0;
 
-    &:hover {
-        @apply hover:bg-[#ffffff12] hover:duration-0;
-    }
-
-    & > div:first-child {
+    & > .details {
         @apply flex flex-1 items-center truncate overflow-hidden px-4 py-2 text-zinc-300 no-underline;
 
-        & > div.is_directory {
+        &:not(a) {
             @apply cursor-default;
         }
     }
 
-    &.is_checked {
+    &[data-state='open'] {
         @apply bg-[#ffffff12];
     }
 
-    &.is_marked {
+    &:has(button[data-state='checked']) {
         @apply bg-[#2a2021];
     }
 }
