@@ -1,4 +1,4 @@
-@import '../../../assets/tailwind.css';
+@reference '../../../assets/tailwind.css';
 
 .manager_actions {
     @apply mb-4 grid w-full grid-cols-2 gap-4 sm:grid-cols-3;

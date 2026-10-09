@@ -40,14 +40,13 @@ const CopyOnClick = ({ text, children, showInNotification }: CopyOnClickProps) =
 
     const child = !text
         ? React.Children.only(children)
-        : React.cloneElement(React.Children.only(children), {
-              // @ts-expect-error - Props type inference issue with React.cloneElement
-              className: clsx(children.props.className || '', 'cursor-pointer'),
+        : React.cloneElement(React.Children.only(children) as React.ReactElement<any>, {
+              className: clsx((children as React.ReactElement<any>).props.className || '', 'cursor-pointer'),
               onClick: (e: React.MouseEvent<HTMLElement>) => {
                   copy(String(text));
                   setCopied(true);
-                  if (typeof children.props.onClick === 'function') {
-                      children.props.onClick(e);
+                  if (typeof (children as React.ReactElement<any>).props.onClick === 'function') {
+                      (children as React.ReactElement<any>).props.onClick(e);
                   }
               },
           });

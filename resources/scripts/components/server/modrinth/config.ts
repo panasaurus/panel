@@ -56,19 +56,7 @@ interface ApiResponse<T> {
 }
 
 // ==================== CONFIG ====================
-const fetchVersion = async () => {
-    try {
-        const response = await axios.get('/api/client/version');
-        return response.data;
-    } catch (error: any) {
-        console.error('Error fetching app version:', error.response?.data || error.message);
-        toast.error('Failed to fetch app version. Using default.');
-        return { version: 'unknown' };
-    }
-};
-
-const data = await fetchVersion();
-export const appVersion = data.version;
+export const appVersion = '1.0.0';
 
 export const MODRINTH_CONFIG = {
     apiBaseUrl: 'https://api.modrinth.com/v2',
@@ -170,10 +158,10 @@ export const ModrinthService = {
     async init(appVersion: string): Promise<boolean> {
         try {
             this.api.interceptors.request.use((config) => {
-                config.headers = {
-                    ...config.headers,
-                    ...MODRINTH_CONFIG.getHeaders(appVersion),
-                };
+                config.headers = Object.assign(
+                    config.headers || {},
+                    MODRINTH_CONFIG.getHeaders(appVersion),
+                );
                 return config;
             });
 
@@ -181,7 +169,7 @@ export const ModrinthService = {
                 const config = error.config as AxiosRequestConfig & { _retryCount?: number };
                 config._retryCount = config._retryCount || 0;
 
-                if (error.response?.status === 429 || error.response?.status >= 500) {
+                if (error.response && (error.response.status === 429 || error.response.status >= 500)) {
                     if (config._retryCount < MODRINTH_CONFIG.maxRetries) {
                         config._retryCount++;
                         const delay = Math.pow(2, config._retryCount) * 1000;

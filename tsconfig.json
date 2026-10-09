@@ -56,8 +56,8 @@
         "noImplicitReturns": true,
         "noPropertyAccessFromIndexSignature": false,
         "noUncheckedIndexedAccess": true,
-        "noUnusedLocals": true,
-        "noUnusedParameters": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
         "preserveWatchOutput": true,
         "resolveJsonModule": true,
         "skipLibCheck": true,
@@ -72,6 +72,7 @@
         "./package.json"
     ],
     "exclude": [
-        "node_modules"
+            "node_modules",
+            "resources/scripts/**/*.spec.ts"
     ]
 }

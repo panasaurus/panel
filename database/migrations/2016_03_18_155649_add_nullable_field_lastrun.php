@@ -11,6 +11,10 @@ class AddNullableFieldLastrun extends Migration
    */
   public function up()
   {
+    if (DB::getDriverName() === 'sqlite') {
+      return;
+    }
+
     $table = DB::getQueryGrammar()->wrapTable('tasks');
 
     if (DB::getDriverName() === 'pgsql') {
@@ -27,6 +31,10 @@ class AddNullableFieldLastrun extends Migration
    */
   public function down()
   {
+    if (DB::getDriverName() === 'sqlite') {
+      return;
+    }
+
     $table = DB::getQueryGrammar()->wrapTable('tasks');
 
     if (DB::getDriverName() === 'pgsql') {

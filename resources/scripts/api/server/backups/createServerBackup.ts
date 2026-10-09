@@ -1,4 +1,4 @@
-import http from '@/api/http';
+import http, { FractalResponseData } from '@/api/http';
 import { getGlobalDaemonType } from '@/api/server/getServer';
 import { ServerBackup } from '@/api/server/types';
 import { rawDataToServerBackup } from '@/api/transformers';
@@ -10,13 +10,19 @@ interface RequestParameters {
 }
 
 interface CreateBackupResponse {
-    data: any;
-    meta: {
+    data?: any;
+    meta?: {
         job_id: string;
         status: string;
         progress: number;
         message?: string;
     };
+    job_id?: string;
+    status?: 'pending' | 'running' | 'completed' | 'failed';
+    message?: string;
+    uuid?: string;
+    object?: string;
+    attributes?: any;
 }
 
 export default async (
@@ -47,24 +53,30 @@ export default async (
     }
 
     if (response.data.job_id && response.data.status) {
-        // Create a minimal backup object for the async job
-        // note: I really don't like this implementation but I really can't be fucked right now to do this better - ellie
         const tempBackup: ServerBackup = {
-            uuid: '', // Will be filled when WebSocket events arrive
+            uuid: '',
             name: params.name || 'Pending...',
             isSuccessful: false,
             isLocked: params.isLocked,
+            isAutomatic: false,
+            ignoredFiles: params.ignored || '',
             checksum: '',
             bytes: 0,
+            sizeGb: 0,
+            adapter: '',
+            isRustic: false,
+            snapshotId: null,
             createdAt: new Date(),
             completedAt: null,
             canRetry: false,
-            jobStatus: response.data.status,
+            jobStatus: response.data.status || 'pending',
             jobProgress: 0,
             jobMessage: response.data.message || '',
-            jobId: response.data.job_id,
+            jobId: response.data.job_id || null,
             jobError: null,
-            object: 'backup',
+            jobStartedAt: null,
+            jobLastUpdatedAt: null,
+            isInProgress: true,
         };
 
         return {
@@ -76,9 +88,11 @@ export default async (
         };
     }
 
-    if (response.data.uuid || response.data.object === 'backup') {
+    if (response.data.uuid || response.data.object === 'backup' || response.data.attributes) {
         try {
-            const backupData = rawDataToServerBackup(response.data);
+            const backupData = rawDataToServerBackup(
+                response.data.attributes ? (response.data as FractalResponseData) : ({ attributes: response.data } as FractalResponseData),
+            );
 
             return {
                 backup: backupData,
@@ -87,7 +101,7 @@ export default async (
                 progress: backupData.jobProgress || 0,
                 message: backupData.jobMessage || '',
             };
-        } catch (transformError) {
+        } catch (transformError: any) {
             throw new Error(`Failed to process backup response: ${transformError.message}`);
         }
     }

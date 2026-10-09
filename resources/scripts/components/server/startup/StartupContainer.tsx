@@ -75,7 +75,7 @@ const StartupContainer = () => {
     const isCustomImage =
         data &&
         !Object.values(data.dockerImages)
-            .map((v) => v.toLowerCase())
+            .map((v) => (v as string).toLowerCase())
             .includes(variables.dockerImage.toLowerCase());
 
     useEffect(() => {
@@ -112,7 +112,7 @@ const StartupContainer = () => {
         revertDockerImage(uuid)
             .then(() => {
                 // Get the first docker image from the egg as the default
-                const defaultImage = data ? Object.values(data.dockerImages)[0] || '' : '';
+                const defaultImage = data ? (Object.values(data.dockerImages)[0] as string) || '' : '';
                 setServerFromState((s) => ({ ...s, dockerImage: defaultImage }));
                 setRevertModalVisible(false);
             })

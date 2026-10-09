@@ -26,7 +26,7 @@ const DashboardRouter = lazy(() => import('@/routers/DashboardRouter'));
 const ServerRouter = lazy(() => import('@/routers/ServerRouter'));
 const AuthenticationRouter = lazy(() => import('@/routers/AuthenticationRouter'));
 
-interface ExtendedWindow extends Window {
+interface ExtendedWindow {
     SiteConfiguration?: SiteSettings;
     PterodactylUser?: {
         uuid: string;
@@ -42,7 +42,7 @@ interface ExtendedWindow extends Window {
 }
 
 const App = () => {
-    const { PterodactylUser, SiteConfiguration } = window as ExtendedWindow;
+    const { PterodactylUser, SiteConfiguration } = (window as unknown) as ExtendedWindow;
     if (PterodactylUser && !store.getState().user.data) {
         store.getActions().user.setUserData({
             uuid: PterodactylUser.uuid,

@@ -1,7 +1,5 @@
-import { ChevronDownIcon } from '@radix-ui/react-icons';
+import { ChevronDown } from '@gravity-ui/icons';
 import { useEffect, useRef, useState } from 'react';
-
-import Button from '../../elements/ButtonV2';
 
 interface ApiFile {
     hashes: {
@@ -94,13 +92,12 @@ const DropdownButton = ({ versions, onVersionSelect, className = '' }: DropdownB
         return (
             <div className={`relative flex justify-center ${className}`}>
                 <div className='relative w-full max-w-md'>
-                    <Button
-                        variant='outline'
-                        className='flex items-center justify-between w-full px-4 py-3 text-left bg-gray-900 border-gray-700 hover:bg-gray-800 transition-colors disabled:opacity-50'
+                    <button
+                        className='flex items-center justify-between w-full px-4 py-3 text-left bg-gray-900 border border-gray-700 rounded-lg text-white transition-colors disabled:opacity-50'
                         disabled
                     >
                         <span className='font-medium truncate'>No versions available</span>
-                    </Button>
+                    </button>
                 </div>
             </div>
         );
@@ -109,10 +106,9 @@ const DropdownButton = ({ versions, onVersionSelect, className = '' }: DropdownB
     return (
         <div className={`relative flex justify-center ${className}`} ref={dropdownRef}>
             <div className='relative w-full max-w-md'>
-                <Button
+                <button
                     ref={buttonRef}
-                    variant='outline'
-                    className='flex items-center justify-between w-full px-4 py-3 text-left bg-gray-900 border-gray-700 hover:bg-gray-800 transition-colors disabled:opacity-50'
+                    className='flex items-center justify-between w-full px-4 py-3 text-left bg-gray-900 border border-gray-700 rounded-lg text-white hover:bg-gray-800 transition-colors disabled:opacity-50'
                     onClick={() => setIsOpen(!isOpen)}
                     aria-haspopup='listbox'
                     aria-expanded={isOpen}
@@ -128,10 +124,12 @@ const DropdownButton = ({ versions, onVersionSelect, className = '' }: DropdownB
                             </span>
                         )}
                     </div>
-                    <ChevronDownIcon
-                        className={`w-5 h-5 ml-2 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
+                    <ChevronDown
+                        width={20}
+                        height={20}
+                        className={`ml-2 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`}
                     />
-                </Button>
+                </button>
 
                 {isOpen && (
                     <div

@@ -23,7 +23,7 @@ export interface ServerBackup {
     completedAt: Date | null;
     // Async job fields
     jobId: string | null;
-    jobStatus: 'pending' | 'running' | 'completed' | 'failed';
+    jobStatus: 'pending' | 'running' | 'completed' | 'failed' | 'cancelled';
     jobProgress: number;
     jobMessage: string | null;
     jobError: string | null;

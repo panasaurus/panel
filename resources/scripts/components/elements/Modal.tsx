@@ -107,11 +107,11 @@ const Modal: React.FC<ModalProps> = ({
                     <DialogContext.Provider value={{ setIcon, setFooter, setIconPosition }}>
                         <HDialog
                             static
-                            as={motion.div}
+                            as={motion.div as any}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            transition={{ duration: 0.15 }}
+                            transition={{ duration: 0.15 } as any}
                             open={visible}
                             onClose={onDialogClose}
                         >
@@ -130,11 +130,11 @@ const Modal: React.FC<ModalProps> = ({
                                     onMouseUp={onContainerClick.bind(this, false)}
                                 >
                                     <HDialog.Panel
-                                        as={motion.div}
+                                        as={motion.div as any}
                                         initial={'closed'}
                                         animate={down ? 'bounce' : 'open'}
                                         exit={'closed'}
-                                        variants={variants}
+                                        variants={variants as any}
                                         className={styles.panel}
                                     >
                                         <div className='place-content-between flex items-center m-6'>

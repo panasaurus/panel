@@ -6,7 +6,7 @@ import getServerBackups from '@/api/swr/getServerBackups';
 import { ServerContext } from '@/state/server';
 
 import { LiveProgressContext } from './BackupContainer';
-import { UnifiedBackup } from './BackupItem';
+import { UnifiedBackup } from './elytra/BackupItem';
 
 export const useUnifiedBackups = () => {
     const { data: backups, error, isValidating, mutate } = getServerBackups();

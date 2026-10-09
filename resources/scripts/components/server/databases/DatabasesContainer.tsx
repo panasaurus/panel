@@ -178,7 +178,7 @@ const DatabasesContainer = () => {
             ) : databases.length > 0 ? (
                 <PageListContainer data-pyro-databases>
                     <For each={databases} memo>
-                        {(database, index) => <DatabaseRow key={database.id} database={database} />}
+                        {(database: any) => <DatabaseRow key={database.id} database={database} />}
                     </For>
                 </PageListContainer>
             ) : (

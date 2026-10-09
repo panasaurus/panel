@@ -131,7 +131,7 @@ const UsersContainer = () => {
             ) : (
                 <PageListContainer data-pyro-users-container-users>
                     <For each={subusers} memo>
-                        {(subuser) => <UserRow key={subuser.uuid} subuser={subuser} />}
+                        {(subuser: any) => <UserRow key={subuser.uuid} subuser={subuser} />}
                     </For>
                 </PageListContainer>
             )}

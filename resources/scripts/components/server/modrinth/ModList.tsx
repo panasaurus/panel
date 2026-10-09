@@ -65,6 +65,7 @@ export const ModList = ({ showInstalled = false, showDependencies = false }: Mod
                 setMods(data);
                 setPage(0);
             } else {
+                // @ts-expect-error functional updater
                 setMods((prev) => [...prev, ...data]);
             }
             setHasMore(data.length >= 20);

@@ -724,14 +724,14 @@ const BackupContainer = () => {
                             daemonType === 'elytra' ? (
                                 <BackupItemElytra
                                     key={backup.uuid}
-                                    backup={backup}
+                                    backup={backup as any}
                                     isSelected={selectedBackups.has(backup.uuid)}
                                     onToggleSelect={() => toggleBackupSelection(backup.uuid)}
                                     isSelectable={selectableBackups.some((b) => b.uuid === backup.uuid)}
                                     retryBackup={retryBackup}
                                 />
                             ) : (
-                                <BackupItemWings key={backup.uuid} backup={backup} />
+                                <BackupItemWings key={backup.uuid} backup={backup as any} />
                             ),
                         )}
                     </PageListContainer>

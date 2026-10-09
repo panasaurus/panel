@@ -85,18 +85,22 @@ class SoftwareVersionService
      */
     protected function cacheVersionData(): array
     {
-        return $this->cache->remember(self::VERSION_CACHE_KEY, CarbonImmutable::now()->addMinutes(config('pterodactyl.cdn.cache_time', 60)), function () {
-            try {
-                $response = $this->client->request('GET', config('pterodactyl.cdn.url'));
+        try {
+            return $this->cache->remember(self::VERSION_CACHE_KEY, CarbonImmutable::now()->addMinutes(config('pterodactyl.cdn.cache_time', 60)), function () {
+                try {
+                    $response = $this->client->request('GET', config('pterodactyl.cdn.url'));
 
-                if ($response->getStatusCode() === 200) {
-                    return json_decode($response->getBody(), true);
+                    if ($response->getStatusCode() === 200) {
+                        return json_decode($response->getBody(), true);
+                    }
+
+                    throw new CdnVersionFetchingException();
+                } catch (\Exception) {
+                    return [];
                 }
-
-                throw new CdnVersionFetchingException();
-            } catch (\Exception) {
-                return [];
-            }
-        });
+            });
+        } catch (\Throwable) {
+            return [];
+        }
     }
 }
