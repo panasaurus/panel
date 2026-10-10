@@ -123,14 +123,15 @@
     </div>
   </div>
 
-  <div class="modal fade" id="installInstructionsModal" tabindex="-1" role="dialog">
+  <div class="modal fade" id="installInstructionsModal" tabindex="-1" role="dialog" aria-labelledby="install-modal-title">
     <div class="modal-dialog" role="document">
-      <div class="modal-content box box-primary" style="margin-bottom:0;">
-        <div class="box-header with-border">
-          <h3 class="box-title"><i class="bi bi-terminal"></i> Install <span id="install-ext-name"></span></h3>
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title" id="install-modal-title"><i class="bi bi-terminal"></i> Install <span id="install-ext-name"></span></h3>
+          <button type="button" class="admin-icon-button" data-dismiss="modal" aria-label="Close installation instructions">@include('partials.admin.icon', ['name' => 'close'])</button>
         </div>
-        <div class="box-body">
-          <ol style="padding-left:18px;line-height:1.9;">
+        <div class="modal-body">
+          <ol>
             <li>Grab the <strong>.blueprint</strong> file for <span id="install-ext-id"></span> from
               <a href="https://blueprint.zip/browse" target="_blank" rel="noopener">blueprint.zip/browse</a>.</li>
             <li>Copy it into your panel directory:<br>
@@ -140,7 +141,7 @@
             <li>Rebuild assets if prompted, then hard-refresh your browser.</li>
           </ol>
         </div>
-        <div class="box-footer">
+        <div class="modal-footer">
           <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         </div>
       </div>
@@ -193,7 +194,7 @@
           document.getElementById('install-ext-name').textContent = identifier;
           document.getElementById('install-ext-id').textContent = identifier;
           document.getElementById('install-cmd').textContent = 'panasaurus -install ' + identifier;
-          $('#installInstructionsModal').modal('show');
+          $('#installInstructionsModal').one('hidden.bs.modal', function () { btn.focus(); }).modal('show');
         });
       });
     })();

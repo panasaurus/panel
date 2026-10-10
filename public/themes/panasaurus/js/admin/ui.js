@@ -2,6 +2,8 @@
     'use strict';
 
     function initAdminUI() {
+        document.querySelectorAll('.wrapper .modal').forEach(function (modal) { document.body.appendChild(modal); });
+
         const menuToggle = document.querySelector('[data-admin-menu-toggle]');
         const sidebar = document.querySelector('#admin-sidebar');
         const mobile = window.matchMedia('(max-width: 767px)');

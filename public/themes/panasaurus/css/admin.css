@@ -9,6 +9,7 @@
     --admin-brand: #23d18d;
     --admin-brand-soft: rgba(35, 209, 141, .10);
     --admin-sidebar: 224px;
+    --admin-modal-gutter: 24px;
     background: var(--admin-background);
     color: var(--admin-text);
     font: 14px/1.55 'Plus Jakarta Sans', sans-serif;
@@ -192,7 +193,22 @@
 .admin-app .select2-container--default .select2-results__option--highlighted[aria-selected] { background: #164b37; color: #fff; }
 .admin-app .select2-container--default .select2-selection--multiple .select2-selection__choice { background: #303034; border-color: #52525b; color: var(--admin-text); }
 .admin-app .select2-container--default .select2-search--dropdown .select2-search__field { background: #09090b; color: var(--admin-text); border-color: #52525b; border-radius: 5px; }
+.admin-app.modal-open .admin-workspace { overflow-y: hidden; }
+.admin-app .modal { position: fixed; inset: 0; padding: var(--admin-modal-gutter) !important; }
+.admin-app .modal.in { display: flex !important; }
+.admin-app .modal-dialog { width: min(600px, 100%); max-height: calc(100dvh - var(--admin-modal-gutter) - var(--admin-modal-gutter)); margin: auto; }
 .admin-app .modal-content, .admin-app .sweet-alert { background: #151518; color: var(--admin-text); border: 1px solid #3f3f46; border-radius: 12px; }
+.admin-app .modal-content { display: flex; flex-direction: column; max-height: calc(100dvh - var(--admin-modal-gutter) - var(--admin-modal-gutter)); overflow: hidden; }
+.admin-app .modal-content > form { display: flex; flex-direction: column; min-height: 0; max-height: inherit; }
+.admin-app .modal-header, .admin-app .modal-footer { flex-shrink: 0; }
+.admin-app .modal-body { min-height: 0; overflow-y: auto; overscroll-behavior: contain; }
+.admin-app #installInstructionsModal .modal-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+.admin-app #installInstructionsModal .modal-header::before, .admin-app #installInstructionsModal .modal-header::after { content: none; }
+.admin-app #installInstructionsModal .modal-title { margin: 0; font-size: 16px; font-weight: 600; line-height: 1.5; overflow-wrap: anywhere; }
+.admin-app #installInstructionsModal .modal-header .admin-icon-button { width: 32px; height: 32px; }
+.admin-app #installInstructionsModal .modal-body ol { padding-left: 20px; margin: 0; line-height: 1.8; }
+.admin-app #installInstructionsModal .modal-body li + li { margin-top: 12px; }
+.admin-app #installInstructionsModal code { white-space: normal; overflow-wrap: anywhere; }
 .admin-app .modal-header, .admin-app .modal-footer { border-color: #303034; padding: 20px; }
 .admin-app .modal-body { padding: 20px; }
 .admin-app .modal-title, .admin-app .sweet-alert h2 { color: var(--admin-text); }
@@ -280,6 +296,7 @@
     .admin-app .admin-search-trigger { min-width: 190px; }
 }
 @media (max-width: 767px) {
+    .admin-app { --admin-modal-gutter: 16px; }
     .admin-app .main-header { position: fixed; inset: 0 0 auto; display: flex; gap: 0; height: 64px; z-index: 100; margin: 0; border-bottom: 1px solid #27272a; background: #050506; }
     .admin-app .admin-workspace { inset: 64px 0 0; border: 0; border-radius: 0; }
     .admin-app .main-header .logo { flex: 0 1 auto; width: auto; height: 64px; padding: 0 16px; border: 0; border-radius: 0; background: transparent; }
