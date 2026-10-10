@@ -24,16 +24,12 @@
         <div class="box box-primary">
             <div class="box-header with-border">
                 <h3 class="box-title">Node List</h3>
-                <div class="box-tools search01">
-                    <form action="{{ route('admin.nodes') }}" method="GET">
-                        <div class="input-group input-group-sm">
-                            <input type="text" name="filter[name]" class="form-control pull-right" value="{{ request()->input('filter.name') }}" placeholder="Search Nodes">
-                            <div class="input-group-btn">
-                                <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
-                                <a href="{{ route('admin.nodes.new') }}"><button type="button" class="btn btn-sm btn-primary" style="border-radius: 0 3px 3px 0;margin-left:-1px;">Create New</button></a>
-                            </div>
-                        </div>
+                <div class="box-tools admin-list-toolbar">
+                    <form action="{{ route('admin.nodes') }}" method="GET" class="admin-list-search">
+                        <input type="search" name="filter[name]" class="form-control" value="{{ request()->input('filter.name') }}" placeholder="Search nodes" aria-label="Search nodes">
+                        <button type="submit" class="btn btn-default" aria-label="Search nodes">@include('partials.admin.icon', ['name' => 'search'])</button>
                     </form>
+                    <a href="{{ route('admin.nodes.new') }}" class="btn btn-primary">Add node</a>
                 </div>
             </div>
             <div class="box-body table-responsive no-padding">
@@ -53,7 +49,7 @@
                             <th class="text-center">Daemon Type</th>
                             <th class="text-center">Public</th>
                         </tr>
-                        @foreach ($nodes as $node)
+                        @forelse ($nodes as $node)
                             <tr>
                                 <td class="text-center text-muted left-icon" data-action="ping" data-secret="{{ $node->getDecryptedKey() }}" data-location="{{ $node->scheme }}://{{ $node->fqdn }}:{{ $node->daemonListen }}/api/system"><i class="fa fa-fw fa-refresh fa-spin"></i></td>
                                 <td>{!! $node->maintenance_mode ? '<span class="label label-warning"><i class="fa fa-wrench"></i></span> ' : '' !!}<a href="{{ route('admin.nodes.view', $node->id) }}">{{ $node->name }}</a></td>
@@ -68,7 +64,13 @@
                                 <td class="text-center">{{ $node->daemonType }}</td>
                                 <td class="text-center"><i class="fa fa-{{ ($node->public) ? 'eye' : 'eye-slash' }}"></i></td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr class="admin-empty-row"><td colspan="12">
+                                <h3>{{ request()->filled('filter.name') ? 'No matching nodes' : 'Connect your first node' }}</h3>
+                                <p>{{ request()->filled('filter.name') ? 'Try a different name or clear your search.' : 'A node is a machine running Wings that hosts your game servers.' }}</p>
+                                <a class="btn btn-default" href="{{ request()->filled('filter.name') ? route('admin.nodes') : route('admin.nodes.new') }}">{{ request()->filled('filter.name') ? 'Clear search' : 'Add node' }}</a>
+                            </td></tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

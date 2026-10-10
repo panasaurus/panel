@@ -1,17 +1,17 @@
-# Build context exclusions for the Panasaurus image.
-# (Only used by Docker builds; tracked files stay in git.)
-
-# Local state
 .git
+.local
+docker-compose.override.yml
+panel
+LOCAL-INSTALL.md
 node_modules
 vendor
 public/build
 data
 .env
 .env.*
+!.env.example
 *.log
 
-# Dev-only tooling not needed inside the image
 tests
 vagrant
 Vagrantfile
@@ -23,6 +23,3 @@ phpstan.neon
 phpunit.xml
 .dockerignore
 .gitignore
-
-# Node sources are compiled in stage 1; sources still needed for Blueprint
-# extension rebuilds inside the container, so resources/ stays included.

@@ -18,16 +18,12 @@
         <div class="box box-primary">
             <div class="box-header with-border">
                 <h3 class="box-title">Server List</h3>
-                <div class="box-tools search01">
-                    <form action="{{ route('admin.servers') }}" method="GET">
-                        <div class="input-group input-group-sm">
-                            <input type="text" name="filter[*]" class="form-control pull-right" value="{{ request()->input()['filter']['*'] ?? '' }}" placeholder="Search Servers">
-                            <div class="input-group-btn">
-                                <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
-                                <a href="{{ route('admin.servers.new') }}"><button type="button" class="btn btn-sm btn-primary" style="border-radius: 0 3px 3px 0;margin-left:-1px;">Create New</button></a>
-                            </div>
-                        </div>
+                <div class="box-tools admin-list-toolbar">
+                    <form action="{{ route('admin.servers') }}" method="GET" class="admin-list-search">
+                        <input type="search" name="filter[*]" class="form-control" value="{{ request()->input('filter.*', '') }}" placeholder="Search servers" aria-label="Search servers">
+                        <button type="submit" class="btn btn-default" aria-label="Search servers">@include('partials.admin.icon', ['name' => 'search'])</button>
                     </form>
+                    <a href="{{ route('admin.servers.new') }}" class="btn btn-primary">Create server</a>
                 </div>
             </div>
             <div class="box-body table-responsive no-padding">
@@ -39,11 +35,10 @@
                             <th>Owner</th>
                             <th>Node</th>
                             <th>Connection</th>
-                            <!-- <th>Domain</th> -->
                             <th></th>
                             <th></th>
                         </tr>
-                        @foreach ($servers as $server)
+                        @forelse ($servers as $server)
                             <tr data-server="{{ $server->uuidShort }}">
                                 <td><a href="{{ route('admin.servers.view', $server->id) }}">{{ $server->name }}</a></td>
                                 <td><code title="{{ $server->uuid }}">{{ $server->uuid }}</code></td>
@@ -52,7 +47,6 @@
                                 <td>
                                     <code>{{ $server->allocation->alias }}:{{ $server->allocation->port }}</code>
                                 </td>
-                                <!-- <td>{{ $server->domain }}</td> -->
                                 <td class="text-center">
                                     @if($server->isSuspended())
                                         <span class="label bg-maroon">Suspended</span>
@@ -70,7 +64,13 @@
                                     <a class="btn btn-xs btn-default" href="/server/{{ $server->uuidShort }}"><i class="fa fa-wrench"></i></a>
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr class="admin-empty-row"><td colspan="7">
+                                <h3>{{ request()->filled('filter.*') ? 'No matching servers' : 'No servers yet' }}</h3>
+                                <p>{{ request()->filled('filter.*') ? 'Try a different name or clear your search.' : 'Connect a node and create your first game server to get started.' }}</p>
+                                <a class="btn btn-default" href="{{ request()->filled('filter.*') ? route('admin.servers') : route('admin.nodes') }}">{{ request()->filled('filter.*') ? 'Clear search' : 'Manage nodes' }}</a>
+                            </td></tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

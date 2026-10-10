@@ -8,12 +8,6 @@ use Illuminate\Support\Facades\Redis;
 use Pterodactyl\Http\Controllers\Controller;
 use Pterodactyl\Repositories\Wings\DaemonPowerRepository;
 
-/**
- * Public health endpoint for Panasaurus.
- *
- * Returns a lightweight, unauthenticated health summary suitable for
- * uptime monitors, orchestrators, and the admin status widget.
- */
 class HealthController extends Controller
 {
     public function __invoke(): JsonResponse
@@ -28,7 +22,7 @@ class HealthController extends Controller
 
         $healthy = !in_array(false, array_column($checks, 'healthy'), true);
 
-        return JsonResponse::create([
+        return (new JsonResponse([
             'status' => $healthy ? 'ok' : 'degraded',
             'checks' => $checks,
             'version' => config('app.version'),
@@ -38,7 +32,7 @@ class HealthController extends Controller
             ],
             'latency_ms' => round((microtime(true) - $startedAt) * 1000, 2),
             'timestamp' => now()->toIso8601String(),
-        ], $healthy ? 200 : 503)->withHeaders([
+        ], $healthy ? 200 : 503))->withHeaders([
             'Cache-Control' => 'no-store, no-cache',
         ]);
     }

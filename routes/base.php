@@ -13,17 +13,7 @@ Route::get('/locales/locale.json', Base\LocaleController::class)
   ->withoutMiddleware(['auth', RequireTwoFactorAuthentication::class])
   ->where('namespace', '.*');
 
-/*
-|--------------------------------------------------------------------------
-| Panasaurus Health Endpoint
-|--------------------------------------------------------------------------
-|
-| Endpoint: /api/health — public, unauthenticated. Suitable for uptime
-| monitors and container health checks. Never leaks internals.
-|
-*/
-
-Route::get('/api/health', [\Pterodactyl\Http\Controllers\Api\Client\HealthController::class])
+Route::get('/api/health', \Pterodactyl\Http\Controllers\Api\Client\HealthController::class)
   ->withoutMiddleware(['auth', RequireTwoFactorAuthentication::class])
   ->name('health');
 

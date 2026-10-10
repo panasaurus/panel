@@ -10,6 +10,11 @@ node_modules/
 .env
 .env.backup
 .env.*.backup
+/.local/
+/data/
+/docker-compose.override.yml
+/panel
+/LOCAL-INSTALL.md
 .phpunit.result.cache
 
 # Application state (created at runtime)

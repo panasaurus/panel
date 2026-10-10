@@ -18,16 +18,12 @@
         <div class="box box-primary">
             <div class="box-header with-border">
                 <h3 class="box-title">User List</h3>
-                <div class="box-tools search01">
-                    <form action="{{ route('admin.users') }}" method="GET">
-                        <div class="input-group input-group-sm">
-                            <input type="text" name="filter[email]" class="form-control pull-right" value="{{ request()->input('filter.email') }}" placeholder="Search">
-                            <div class="input-group-btn">
-                                <button type="submit" class="btn btn-default"><i class="fa fa-search"></i></button>
-                                <a href="{{ route('admin.users.new') }}"><button type="button" class="btn btn-sm btn-primary" style="border-radius: 0 3px 3px 0;margin-left:-1px;">Create New</button></a>
-                            </div>
-                        </div>
+                <div class="box-tools admin-list-toolbar">
+                    <form action="{{ route('admin.users') }}" method="GET" class="admin-list-search">
+                        <input type="search" name="filter[email]" class="form-control" value="{{ request()->input('filter.email') }}" placeholder="Search users" aria-label="Search users">
+                        <button type="submit" class="btn btn-default" aria-label="Search users">@include('partials.admin.icon', ['name' => 'search'])</button>
                     </form>
+                    <a href="{{ route('admin.users.new') }}" class="btn btn-primary">Create user</a>
                 </div>
             </div>
             <div class="box-body table-responsive no-padding">
@@ -44,7 +40,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ($users as $user)
+                        @forelse ($users as $user)
                             <tr class="align-middle">
                                 <td><code>{{ $user->id }}</code></td>
                                 <td><a href="{{ route('admin.users.view', $user->id) }}">{{ $user->email }}</a> @if($user->root_admin)<i class="fa fa-star text-yellow"></i>@endif</td>
@@ -62,7 +58,9 @@
                                 <td class="text-center">{{ $user->subuser_of_count }}</td>
                                 <td class="text-center"><img src="https://www.gravatar.com/avatar/{{ md5(strtolower($user->email)) }}?s=100" style="height:20px;" class="img-circle" /></td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr class="admin-empty-row"><td colspan="7"><h3>No matching users</h3><p>Try a different email or clear your search.</p><a class="btn btn-default" href="{{ route('admin.users') }}">Clear search</a></td></tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

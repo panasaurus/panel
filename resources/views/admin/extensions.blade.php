@@ -9,6 +9,11 @@ $is_installed=(($PlaceholderService->installed() != "NOTINSTALLED") && ($Placeho
 @endphp
 
 @section('content-header')
+  <h1>Extensions<small>Manage installed extensions and configure your panel.</small></h1>
+  <ol class="breadcrumb">
+    <li><a href="{{ route('admin.index') }}">Admin</a></li>
+    <li class="active">Extensions</li>
+  </ol>
   @if($is_installed)
     @if(($PlaceholderService->version() != $latestBlueprintVersion) && ($PlaceholderService->version() != "rolling") && $latestBlueprintVersion != "unknown")
       <div class="blueprint-statusbar blueprint-statusbar-danger">
@@ -60,87 +65,21 @@ $is_installed=(($PlaceholderService->installed() != "NOTINSTALLED") && ($Placeho
       </div>
     @endif
 
-    <div class="blueprint-page-header">
-      <div class="row">
-        <div class="col-lg-8 col-md-9 col-sm-9 col-xs-12" style="padding-top: 3px; padding-bottom: 3px;">
-          <p>
-            <span class="text-bold h4">Blueprint</span>
-          </p>
-          <span>
-            Pterodactyl's favorite modding community. Develop, collaborate and install extensions with the extension platform that puts you first. Pterodactyl themes, plugin installers, player managers, admin tools and much more. There's a Blueprint extension for that.
-          </span>
-        </div>
-        <div class="col-lg-4 col-md-3 col-sm-3 col-xs-12" style="padding-top: 3px; padding-bottom: 3px;">
-          <a href="https://blueprint.zip/" target="_blank" class="pull-right text-bold">
-            Learn more
-          </a>
-        </div>
-      </div>
-    </div>
   @endif
-
-  <style>
-    .blueprint-statusbar {
-      width: calc(100% + 3px);
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      background-color: #1f2933;
-      border-radius: 8px;
-      padding: 10px 20px;
-      margin-bottom: 15px;
-    }
-    .blueprint-statusbar.blueprint-statusbar-danger {
-      background-image: linear-gradient(
-        to left,
-        #1f2933 50%,
-        #5c143b 100%
-      );
-    }
-    .blueprint-statusbar.blueprint-statusbar-warning {
-      background-image: linear-gradient(
-        to left,
-        #1f2933 60%,
-        #a43e006e 100%
-      );
-    }
-
-    .blueprint-page-header {
-      width: calc(100% + 3px);
-      background-color: #1f2933;
-      border-radius: 8px;
-      padding: 14px 20px;
-      background-image: linear-gradient(
-        to right,
-        #1f2933 50%,
-        transparent 100%
-      ), url('/assets/extensions/blueprint/promo-blur.jpg');
-      background-size: 100% 100%, cover;
-      background-position: left center, right center;
-      background-repeat: no-repeat;
-    }
-  </style>
 @endsection
 
 @section('content')
   @if($is_installed)
-    <div class="row" style="padding-left: 15px; padding-right: 10px;">
-      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 text-center" style="padding-left: 0px; padding-right: 17px;">
-        <button class="btn extension-btn" style="width:100%;margin-bottom:17px;" data-toggle="modal" data-target="#blueprintConfigModal">
-          <div class="extension-btn-overlay"></div>
-          <img src="/assets/extensions/blueprint/logo.jpg" alt="logo" class="extension-btn-image2"/>
-          <img src="/assets/extensions/blueprint/logo.jpg" alt="logo" class="extension-btn-image"/>
-          <p class="extension-btn-text">Blueprint</p>
-          <p class="extension-btn-version" style="opacity: .6;">
-            <span style="padding-right:5px">
-              <i class="bi bi-gear-fill"></i>
-              <b>system</b>
-            </span>
-            {{ $PlaceholderService->version() }}
-          </p>
-          <i class="bi bi-three-dots-vertical" style="font-size: 20px;position: absolute;top: 25px;right: 37px;"></i>
-        </button>
-      </div>
+    <div class="admin-extension-intro">
+      <div><h2>Powered by Blueprint</h2><p>Extend your panel with themes, plugins, and admin tools.</p></div>
+      <a href="https://blueprint.zip/" target="_blank" rel="noopener noreferrer">Learn more @include('partials.admin.icon', ['name' => 'external'])</a>
+    </div>
+    <div class="admin-extension-grid">
+      <button type="button" class="admin-extension-card" data-toggle="modal" data-target="#blueprintConfigModal">
+        <img src="/assets/extensions/blueprint/logo.jpg" alt="" class="admin-extension-icon" />
+        <span class="admin-extension-details"><strong>Blueprint</strong><span><span class="admin-status">System</span> {{ $PlaceholderService->version() }}</span></span>
+        @include('partials.admin.icon', ['name' => 'settings'])
+      </button>
 
       @foreach($blueprint->extensionsConfigs() as $extension)
         <?php
@@ -161,36 +100,15 @@ $is_installed=(($PlaceholderService->installed() != "NOTINSTALLED") && ($Placeho
         ])
       @endforeach
 
-      <div class="col-lg-3 col-md-4 col-sm-6 col-xs-12 text-center" style="padding-left: 0px; padding-right: 20px;">
-        <a href="https://blueprint.zip/browse" target="_blank">
-          <button class="blueprint-add" style="margin-bottom:17px;">
-            <i class="bi bi-plus" style="font-size: 36px"></i>
-          </button>
-        </a>
-      </div>
-
-      <style>
-        .blueprint-add {
-          background-color:rgb(44, 55, 67);
-          border: transparent;
-          border-radius: 8px;
-          height: 79px;
-          width: 79px;
-          float: left;
-          color: #CAD1D8;
-        }
-
-        .blueprint-flag-warning {
-          font-size: 14px;
-          vertical-align: middle;
-          margin-left: 8px;
-        }
-      </style>
+      <a href="{{ route('admin.extensions.marketplace') }}" class="admin-extension-card admin-extension-browse">
+        <span class="admin-extension-icon">@include('partials.admin.icon', ['name' => 'plus'])</span>
+        <span class="admin-extension-details"><strong>Browse extensions</strong><span>Explore the marketplace</span></span>
+        @include('partials.admin.icon', ['name' => 'arrow'])
+      </a>
     </div>
 
 
 
-    <!-- Blueprint configuration -->
     <div class="modal fade" id="blueprintConfigModal" tabindex="-1" role="dialog">
       <div class="modal-dialog" role="document">
         <div class="modal-content" style="background-color:transparent">
@@ -271,7 +189,6 @@ $is_installed=(($PlaceholderService->installed() != "NOTINSTALLED") && ($Placeho
         </div>
       </div>
     </div>
-  </div>
 
   @else
     <center>
@@ -298,29 +215,6 @@ $is_installed=(($PlaceholderService->installed() != "NOTINSTALLED") && ($Placeho
     </center>
   @endif
 
-  <style>
-    /* style content */
-    a:has(button.btn.extension-btn) {
-      height: 96px;
-      display: inline-block;
-      width: 100%;
-    }
-    section.content {
-      padding-right: 0px !important;
-      display: inline-block !important;
-      width: 100% !important;
-    }
-    .skin-blue .wrapper {
-      box-shadow: unset;
-    }
-
-    .blueprint-button-link {
-      font-size: 14px;
-      background: unset;
-      border: unset;
-      color: #ec55ad;
-    }
-  </style>
 @endsection
 
 @section('footer-scripts')
@@ -393,7 +287,7 @@ $is_installed=(($PlaceholderService->installed() != "NOTINSTALLED") && ($Placeho
 
       flagRows.forEach(row => {
         const input = row.querySelector('select, input');
-        if (!input) return; // Skip if no input found
+        if (!input) return;
 
         handleValueChange(row, input);
 
