@@ -65,14 +65,8 @@ class ApiKey extends Model
   /** @use HasFactory<\Database\Factories\ApiKeyFactory> */
   use HasFactory;
 
-  /**
-   * The resource name for this model when it is transformed into an
-   * API representation using fractal.
-   */
   public const RESOURCE_NAME = 'api_key';
-  /**
-   * Different API keys that can exist on the system.
-   */
+
   public const TYPE_NONE = 0;
   public const TYPE_ACCOUNT = 1;
   /* @deprecated */
@@ -81,24 +75,13 @@ class ApiKey extends Model
   public const TYPE_DAEMON_USER = 3;
   /* @deprecated */
   public const TYPE_DAEMON_APPLICATION = 4;
-  /**
-   * The length of API key identifiers.
-   */
+
   public const IDENTIFIER_LENGTH = 16;
-  /**
-   * The length of the actual API key that is encrypted and stored
-   * in the database.
-   */
+
   public const KEY_LENGTH = 32;
 
-  /**
-   * The table associated with the model.
-   */
   protected $table = 'api_keys';
 
-  /**
-   * Cast values to correct type.
-   */
   protected $casts = [
     'allowed_ips' => 'array',
     'user_id' => 'int',
@@ -117,9 +100,6 @@ class ApiKey extends Model
     'r_' . AdminAcl::RESOURCE_SERVERS => 'int',
   ];
 
-  /**
-   * Fields that are mass assignable.
-   */
   protected $fillable = [
     'identifier',
     'token',
@@ -129,15 +109,8 @@ class ApiKey extends Model
     'expires_at',
   ];
 
-  /**
-   * Fields that should not be included when calling toArray() or toJson()
-   * on this model.
-   */
   protected $hidden = ['token'];
 
-  /**
-   * Rules to protect against invalid data entry to DB.
-   */
   public static array $validationRules = [
     'user_id' => 'required|exists:users,id',
     'key_type' => 'present|integer|min:0|max:4',
@@ -159,9 +132,6 @@ class ApiKey extends Model
     'r_' . AdminAcl::RESOURCE_SERVERS => 'integer|min:0|max:3',
   ];
 
-  /**
-   * Returns the user this token is assigned to.
-   */
   public function user(): BelongsTo
   {
     return $this->belongsTo(User::class);
@@ -177,9 +147,6 @@ class ApiKey extends Model
     return $this->user();
   }
 
-  /**
-   * Finds the model matching the provided token.
-   */
   public static function findToken(string $token): ?self
   {
     $identifier = substr($token, 0, self::IDENTIFIER_LENGTH);
@@ -192,19 +159,13 @@ class ApiKey extends Model
     return null;
   }
 
-  /**
-   * Returns the standard prefix for API keys in the system.
-   */
   public static function getPrefixForType(int $type): string
   {
     Assert::oneOf($type, [self::TYPE_ACCOUNT, self::TYPE_APPLICATION]);
 
-    return $type === self::TYPE_ACCOUNT ? 'pyro_' : 'pyro_';
+    return 'panas_';
   }
 
-  /**
-   * Generates a new identifier for an API key.
-   */
   public static function generateTokenIdentifier(int $type): string
   {
     $prefix = self::getPrefixForType($type);

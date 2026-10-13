@@ -3,6 +3,8 @@
 # ----------------------------------------------------------------------------
 /vendor/
 node_modules/
+/.swc/
+/wings/
 /public/build/
 /public/assets/manifest.json
 

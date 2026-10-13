@@ -30,12 +30,7 @@ const SettingsContainer = () => {
         <ServerContentBlock title={'Settings'}>
             <BlueprintBeforeContent />
             <FlashMessageRender byKey={'settings'} />
-            <MainPageHeader direction='column' title={'Settings'}>
-                <p className='text-sm text-neutral-400 leading-relaxed'>
-                    Configure your server settings, manage SFTP access, and access debug information. Make changes to
-                    server name and reinstall when needed.
-                </p>
-            </MainPageHeader>
+            <MainPageHeader hideTitle direction='column' title={'Settings'} />
             <Can action={'settings.rename'}>
                 <div className={`mb-6 md:mb-10`}>
                     <RenameServerBox />

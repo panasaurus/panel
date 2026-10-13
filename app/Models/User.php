@@ -96,25 +96,12 @@ class User extends Model implements
     public const USER_LEVEL_USER = 0;
     public const USER_LEVEL_ADMIN = 1;
 
-    /**
-     * The resource name for this model when it is transformed into an
-     * API representation using fractal.
-     */
     public const RESOURCE_NAME = 'user';
 
-    /**
-     * Level of servers to display when using access() on a user.
-     */
     protected string $accessLevel = 'all';
 
-    /**
-     * The table associated with the model.
-     */
     protected $table = 'users';
 
-    /**
-     * A list of mass-assignable variables.
-     */
     protected $fillable = [
         'external_id',
         'username',
@@ -130,9 +117,6 @@ class User extends Model implements
         'root_admin',
     ];
 
-    /**
-     * Cast values to correct type.
-     */
     protected $casts = [
         'root_admin' => 'boolean',
         'use_totp' => 'boolean',
@@ -140,14 +124,8 @@ class User extends Model implements
         'totp_authenticated_at' => 'datetime',
     ];
 
-    /**
-     * The attributes excluded from the model's JSON form.
-     */
     protected $hidden = ['password', 'remember_token', 'totp_secret', 'totp_authenticated_at'];
 
-    /**
-     * Default values for specific fields in the database.
-     */
     protected $attributes = [
         'external_id' => null,
         'root_admin' => false,
@@ -156,9 +134,6 @@ class User extends Model implements
         'totp_secret' => null,
     ];
 
-    /**
-     * Rules verifying that the data being stored matches the expectations of the database.
-     */
     public static array $validationRules = [
         'uuid' => 'required|string|size:36|unique:users,uuid',
         'email' => 'required|email|between:1,191|unique:users,email',
@@ -173,10 +148,6 @@ class User extends Model implements
         'totp_secret' => 'nullable|string',
     ];
 
-    /**
-     * Implement language verification by overriding Eloquence's gather
-     * rules function.
-     */
     public static function getRules(): array
     {
         $rules = parent::getRules();
@@ -187,12 +158,14 @@ class User extends Model implements
         return $rules;
     }
 
-    /**
-     * Return the user model in a format that can be passed over to Vue templates.
-     */
     public function toVueObject(): array
     {
-        return Collection::make($this->toArray())->except(['id', 'external_id'])->toArray();
+        $user = Collection::make($this->toArray())->except(['id', 'external_id'])->toArray();
+        $user['image'] = $this->gravatar
+            ? 'https://gravatar.com/avatar/'.hash('sha256', strtolower(trim($this->email))).'?s=160&d=blank'
+            : null;
+
+        return $user;
     }
 
     /**
@@ -210,25 +183,16 @@ class User extends Model implements
         $this->notify(new ResetPasswordNotification($token));
     }
 
-    /**
-     * Store the username as a lowercase string.
-     */
     public function setUsernameAttribute(string $value)
     {
         $this->attributes['username'] = mb_strtolower($value);
     }
 
-    /**
-     * Return a concatenated result for the accounts full name.
-     */
     public function getNameAttribute(): string
     {
         return trim($this->name_first . ' ' . $this->name_last);
     }
 
-    /**
-     * Returns all servers that a user owns.
-     */
     public function servers(): HasMany
     {
         return $this->hasMany(Server::class, 'owner_id');
@@ -250,19 +214,11 @@ class User extends Model implements
         return $this->hasMany(UserSSHKey::class);
     }
 
-    /**
-     * Returns all the activity logs where this user is the subject — not to
-     * be confused by activity logs where this user is the _actor_.
-     */
     public function activity(): MorphToMany
     {
         return $this->morphToMany(ActivityLog::class, 'subject', 'activity_log_subjects');
     }
 
-    /**
-     * Returns all the servers that a user can access by way of being the owner of the
-     * server, or because they are assigned as a subuser for that server.
-     */
     public function accessibleServers(): Builder
     {
         return Server::query()

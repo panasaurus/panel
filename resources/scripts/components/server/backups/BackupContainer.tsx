@@ -40,7 +40,6 @@ import BlueprintAfterContent from '@blueprint/components/Server/Backups/AfterCon
 const BackupItemElytra = lazy(() => import('./elytra/BackupItem'));
 const BackupItemWings = lazy(() => import('./wings/BackupItem'));
 
-// Context to share live backup progress across components
 export const LiveProgressContext = createContext<
     Record<
         string,
@@ -57,7 +56,6 @@ export const LiveProgressContext = createContext<
     >
 >({});
 
-// Helper function to format storage values
 const formatStorage = (mb: number | undefined | null): string => {
     if (mb === null || mb === undefined) {
         return '0MB';
@@ -127,7 +125,7 @@ const ModalContent = ({ ...props }: RequiredModalProps) => {
 };
 
 const BackupContainer = () => {
-    const { page, setPage } = useContext(ServerBackupContext);
+    const { setPage } = useContext(ServerBackupContext);
     const { clearFlashes, clearAndAddHttpError, addFlash } = useFlash();
     const liveProgress = useContext(LiveProgressContext);
     const [createModalVisible, setCreateModalVisible] = useState(false);
@@ -136,7 +134,6 @@ const BackupContainer = () => {
     const [deleteAllPassword, setDeleteAllPassword] = useState('');
     const [deleteAllTotpCode, setDeleteAllTotpCode] = useState('');
 
-    // Bulk operations state
     const [selectedBackups, setSelectedBackups] = useState<Set<string>>(new Set());
     const [bulkDeleteModalVisible, setBulkDeleteModalVisible] = useState(false);
     const [isBulkDeleting, setIsBulkDeleting] = useState(false);
@@ -153,7 +150,6 @@ const BackupContainer = () => {
     const backupLimit = ServerContext.useStoreState((state) => state.server.data!.featureLimits.backups);
     const backupStorageLimit = ServerContext.useStoreState((state) => state.server.data!.featureLimits.backupStorageMb);
 
-    // Check if any backup operation is in progress
     const hasActiveOperation = Object.values(liveProgress).some((op) => !op.completed);
 
     useEffect(() => {
@@ -166,7 +162,6 @@ const BackupContainer = () => {
         try {
             await createBackup(values.name, values.ignored, values.isLocked);
 
-            // Clear any existing flash messages
             clearFlashes('backups');
             clearFlashes('backups:create');
 
@@ -199,7 +194,6 @@ const BackupContainer = () => {
             setDeleteAllPassword('');
             setDeleteAllTotpCode('');
 
-            // Websocket events will handle the UI updates automatically
         } catch (error) {
             toast.error(httpErrorToHuman(error));
         } finally {
@@ -207,7 +201,6 @@ const BackupContainer = () => {
         }
     };
 
-    // Bulk selection handlers
     const toggleBackupSelection = (backupUuid: string) => {
         setSelectedBackups((prev) => {
             const newSet = new Set(prev);
@@ -232,7 +225,6 @@ const BackupContainer = () => {
         setSelectedBackups(new Set());
     };
 
-    // Get backups that can be selected (completed and not active)
     const selectableBackups = backups.filter((b) => b.status === 'completed' && b.isSuccessful && !b.isLiveOnly);
 
     const handleBulkDelete = async () => {
@@ -276,7 +268,6 @@ const BackupContainer = () => {
             setBulkDeleteTotpCode('');
             clearSelection();
 
-            // Refresh the backup list to reflect the deletions
             await refresh();
         } catch (error) {
             clearAndAddHttpError({ key: 'backups:bulk_delete', error });
@@ -297,12 +288,7 @@ const BackupContainer = () => {
         return (
             <ServerContentBlock title={'Backups'}>
                 <FlashMessageRender byKey={'backups'} />
-                <MainPageHeader direction='column' title={'Backups'}>
-                    <p className='text-sm text-neutral-400 leading-relaxed'>
-                        Create and manage server backups to protect your data. Schedule automated backups, download
-                        existing ones, and restore when needed.
-                    </p>
-                </MainPageHeader>
+                <MainPageHeader hideTitle direction='column' title={'Backups'} />
                 <div className='flex items-center justify-center py-12'>
                     <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-brand'></div>
                 </div>
@@ -315,13 +301,14 @@ const BackupContainer = () => {
             <BlueprintBeforeContent />
             <FlashMessageRender byKey={'backups'} />
             <MainPageHeader
+                hideTitle
                 direction='column'
                 title={'Backups'}
                 titleChildren={
                     <Can action={'backup.create'}>
                         <div className='flex flex-col sm:flex-row items-center justify-end gap-4'>
                             <div className='flex flex-col gap-1 text-center sm:text-right'>
-                                {/* Backup Count Display */}
+
                                 {backupLimit === null && <p className='text-sm text-zinc-300'>{backupCount} backups</p>}
                                 {backupLimit > 0 && (
                                     <p className='text-sm text-zinc-300'>
@@ -330,7 +317,6 @@ const BackupContainer = () => {
                                 )}
                                 {backupLimit === 0 && <p className='text-sm text-red-400'>Backups disabled</p>}
 
-                                {/* Storage Usage Display */}
                                 {storage && (
                                     <div className='flex flex-col gap-0.5'>
                                         {backupStorageLimit === null ? (
@@ -430,13 +416,7 @@ const BackupContainer = () => {
                         </div>
                     </Can>
                 }
-            >
-                <p className='text-sm text-neutral-400 leading-relaxed'>
-                    Create and manage server backups to protect your data. Schedule automated backups, download existing
-                    ones, and restore when needed. Backups are deduplicated, meaning unchanged files are only stored
-                    once across all backups
-                </p>
-            </MainPageHeader>
+            />
 
             {createModalVisible && (
                 <Formik
@@ -555,7 +535,6 @@ const BackupContainer = () => {
                 </Modal>
             )}
 
-            {/* Bulk delete modal */}
             {bulkDeleteModalVisible && (
                 <Modal
                     visible={bulkDeleteModalVisible}
@@ -682,7 +661,7 @@ const BackupContainer = () => {
                 </div>
             ) : (
                 <>
-                    {/* Bulk action bar */}
+
                     {selectableBackups.length > 0 && (
                         <div className='mb-8 flex items-center justify-between px-4 py-3.5 rounded-xl bg-[#ffffff08] border border-zinc-700'>
                             <div className='flex items-center gap-4'>
@@ -767,7 +746,6 @@ const BackupContainerWrapper = () => {
         >
     >({});
 
-    // Single websocket listener for the entire page
     const handleBackupStatus = useCallback(
         (rawData: any) => {
             let data;
@@ -777,7 +755,7 @@ const BackupContainerWrapper = () => {
                 } else {
                     data = rawData;
                 }
-            } catch (error) {
+            } catch {
                 return;
             }
 
@@ -828,9 +806,6 @@ const BackupContainerWrapper = () => {
 
             if (status === 'completed' && progress === 100) {
                 if (isDeletionOperation) {
-                    // Optimistically remove the deleted backup from SWR cache immediately
-                    // note: this is incredibly buggy sometimes, somebody please refactor how "live" backups work. - ellie
-                    // Changed this to use "revalidate: false" so the optimistic update persists - tyr
                     mutate(
                         (currentData) => {
                             if (!currentData) return currentData;
@@ -843,14 +818,12 @@ const BackupContainerWrapper = () => {
                         { revalidate: false },
                     );
 
-                    // Remove from live progress immediately
                     setLiveProgress((prev) => {
                         const updated = { ...prev };
                         delete updated[backup_uuid];
                         return updated;
                     });
                 } else {
-                    // For new backups, wait for them to appear in the API
                     mutate();
                     const checkForBackup = async (attempts = 0) => {
                         if (attempts > 10) {
@@ -862,7 +835,6 @@ const BackupContainerWrapper = () => {
                             return;
                         }
 
-                        // Force fresh data
                         const currentBackups = await mutate();
                         const backupExists = currentBackups?.items?.some((b) => b.uuid === backup_uuid);
 

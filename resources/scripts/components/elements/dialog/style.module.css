@@ -5,8 +5,7 @@
 }
 
 .panel {
-    @apply relative mx-auto w-full max-w-xl rounded-2xl border-[1px] border-[#ffffff07] text-left shadow-2xl backdrop-blur-3xl;
-    background: linear-gradient(0deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), rgba(255, 255, 255, 0.12);
+    @apply relative mx-auto w-full max-w-xl rounded-2xl border-[1px] border-[#3f3f46] bg-[#151518] text-[#f4f4f5] text-left shadow-2xl;
 }
 
 .title {
@@ -21,18 +20,18 @@
     @apply mr-4 flex h-10 w-10 items-center justify-center rounded-full;
 
     &.danger {
-        @apply bg-red-500 text-red-50;
+        @apply border border-[#71333e] bg-[#34191e] text-[#fca5a5];
     }
 
     &.warning {
-        @apply bg-yellow-600 text-yellow-50;
+        @apply border border-[#72571e] bg-[#332813] text-[#fcd34d];
     }
 
     &.success {
-        @apply bg-green-600 text-green-50;
+        @apply border border-[#22503f] bg-brand/10 text-[#55e3ae];
     }
 
     &.info {
-        @apply bg-zinc-500 text-zinc-50;
+        @apply border border-[#2e4e74] bg-[#172a42] text-[#93c5fd];
     }
 }

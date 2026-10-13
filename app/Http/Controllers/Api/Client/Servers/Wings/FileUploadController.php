@@ -8,23 +8,19 @@ use Pterodactyl\Models\Server;
 use Illuminate\Http\JsonResponse;
 use Pterodactyl\Enums\Daemon\JwtScope;
 use Pterodactyl\Services\Nodes\NodeJWTService;
+use Pterodactyl\Services\Servers\GetUserPermissionsService;
 use Pterodactyl\Http\Controllers\Api\Client\ClientApiController;
 use Pterodactyl\Http\Requests\Api\Client\Servers\Files\UploadFileRequest;
 
 class FileUploadController extends ClientApiController
 {
-    /**
-     * FileUploadController constructor.
-     */
+
     public function __construct(
         private NodeJWTService $jwtService,
     ) {
         parent::__construct();
     }
 
-    /**
-     * Returns an url where files can be uploaded to.
-     */
     public function __invoke(UploadFileRequest $request, Server $server): JsonResponse
     {
         return new JsonResponse([
@@ -35,15 +31,12 @@ class FileUploadController extends ClientApiController
         ]);
     }
 
-    /**
-     * Returns an url where files can be uploaded to.
-     */
     protected function getUploadUrl(Server $server, User $user): string
     {
         $token = $this->jwtService
             ->setExpiresAt(CarbonImmutable::now()->addMinutes(15))
             ->setUser($user)
-            ->setClaims(['server_uuid' => $server->uuid])
+            ->setClaims(['server_uuid' => $server->uuid, 'permissions' => app(GetUserPermissionsService::class)->handle($server, $user)])
             ->setScopes(JwtScope::FileUpload)
             ->handle($server->node, $user->id . $server->uuid);
 

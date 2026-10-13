@@ -12,7 +12,7 @@
         "java_version"
     ],
     "docker_images": {
-        "ghcr.io/pterodactyl/games:hytale": "ghcr.io/pterodactyl/games:hytale"
+        "ghcr.io/panasaurus/images:hytale": "ghcr.io/panasaurus/images:hytale"
     },
     "file_denylist": [],
     "startup": "java -XX:AOTCache=Server\/HytaleServer.aot -Xms128M $( ((SERVER_MEMORY)) && printf %s \"-Xmx${SERVER_MEMORY}M\" ) -jar Server\/HytaleServer.jar $( ((HYTALE_ALLOW_OP)) && printf %s \"--allow-op\" ) --assets Assets.zip --bind 0.0.0.0:${SERVER_PORT}",
@@ -25,7 +25,7 @@
     "scripts": {
         "installation": {
             "script": "#!\/bin\/ash\nset -e\n\nmkdir -p \/mnt\/server\ncd \/mnt\/server\n\necho -e \"Downloading Hytale Downloader CLI...\"\n\nDOWNLOAD_URL=\"https:\/\/downloader.hytale.com\/hytale-downloader.zip\"\n\nrm -f hytale-downloader.zip\ncurl -o hytale-downloader.zip $DOWNLOAD_URL\nunzip -o hytale-downloader.zip -d hytale-downloader\nmv hytale-downloader\/hytale-downloader-linux-amd64 hytale-downloader\/hytale-downloader-linux\nchmod 555 hytale-downloader\/hytale-downloader-linux\n\necho -e \"Verifying Hytale Downloader installation...\"\n\necho -e \"Hytale Downloader version: `.\/hytale-downloader\/hytale-downloader-linux -version`\"\n\necho -e \"Hytale Downloader installed successfully.\"",
-            "container": "ghcr.io/pterodactyl/installers:alpine",
+            "container": "ghcr.io/panasaurus/images:installer_alpine",
             "entrypoint": "ash"
         }
     },

@@ -18,12 +18,12 @@
     ],
     "docker_images": {
         "Java 25": "ghcr.io/panasaurus/images:java_25",
-        "Java 21": "ghcr.io\/pterodactyl\/yolks:java_21",
-        "Java 18": "ghcr.io/pterodactyl/yolks:java_18",
-        "Java 17": "ghcr.io/pterodactyl/yolks:java_17",
-        "Java 16": "ghcr.io\/pterodactyl\/yolks:java_16",
-        "Java 11": "ghcr.io\/pterodactyl\/yolks:java_11",
-        "Java 8": "ghcr.io\/pterodactyl\/yolks:java_8"
+        "Java 21": "ghcr.io\/panasaurus\/images:java_21",
+        "Java 18": "ghcr.io/panasaurus/images:java_18",
+        "Java 17": "ghcr.io/panasaurus/images:java_17",
+        "Java 16": "ghcr.io\/panasaurus\/images:java_16",
+        "Java 11": "ghcr.io\/panasaurus\/images:java_11",
+        "Java 8": "ghcr.io\/panasaurus\/images:java_8"
     },
     "file_denylist": [],
     "startup": "java -Xms128M -XX:MaxRAMPercentage=95.0 -jar {{SERVER_JARFILE}}",
@@ -36,7 +36,7 @@
     "scripts": {
         "installation": {
             "script": "#!\/bin\/ash\r\n# Sponge Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\n\r\ncd \/mnt\/server\r\n\r\ncurl -sSL \"https:\/\/repo.spongepowered.org\/maven\/org\/spongepowered\/spongevanilla\/${SPONGE_VERSION}\/spongevanilla-${SPONGE_VERSION}.jar\" -o ${SERVER_JARFILE}",
-            "container": "ghcr.io\/pterodactyl\/installers:alpine",
+            "container": "ghcr.io\/panasaurus\/images:installer_alpine",
             "entrypoint": "ash"
         }
     },

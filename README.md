@@ -7,27 +7,46 @@ Panasaurus is a game server management panel built on the proven Pterodactyl/Pyr
 - **Blueprint built in** — install community extensions in seconds, no patching required. Manage everything from the admin area's **Extensions** page, or browse the built-in **Marketplace**.
 - **Docker-native** — built via Docker, installed via Docker, extended via Docker. One command to go from zero to a running panel.
 
-## Quick start (Docker)
+## VPS installation
+
+Use Ubuntu 22.04, 24.04, or 26.04, or Debian 12 or 13, on an amd64 or arm64 VPS. Allow at least 2 GB RAM and 10 GB free disk space; 4 GB RAM is recommended for the source build. Run the installer as root or with sudo.
+
+For an IP-based test, copy `install.sh` to the VPS and run:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/panasaurus/panel/main/install.sh | bash
+sudo bash install.sh --ip YOUR_VPS_IP --email admin@example.com
 ```
 
-That's it. The installer:
-
-1. Downloads the Panasaurus compose stack into `./panasaurus/`
-2. Generates strong database + admin credentials
-3. Pulls and boots MariaDB, Redis, and the panel
-4. Applies migrations and seeds the Blueprint framework
-5. Prints your admin credentials (shown once — save them!)
-
-Prefer manual control?
+For a domain, point its DNS records at the VPS and allow incoming TCP ports 80 and 443 before running:
 
 ```bash
-git clone https://github.com/panasaurus/panel.git panasaurus
-cd panasaurus
-docker compose up -d
+sudo bash install.sh --domain panel.example.com --email admin@example.com
 ```
+
+The installer installs Docker when needed, builds the panel from source, and starts MariaDB, Redis, the panel, and Caddy. It enables the queue worker and scheduler, applies database migrations, and creates the admin account. [Docker's official apt repository](https://docs.docker.com/engine/install/ubuntu/) supplies Docker; [Caddy manages domain certificates and renewals](https://caddyserver.com/docs/automatic-https).
+
+The default installation directory is `/opt/panasaurus`. Configuration, stable encryption keys, and credentials are saved under `.local/vps/` with restricted permissions. Database, storage, extensions, cache, and certificates use persistent Docker volumes. The script prints the URL and initial password after health, account, worker, and web proxy checks pass. Rerunning it reuses the existing configuration and data; it does not fetch a new version.
+
+Additional options:
+
+```bash
+sudo bash install.sh --check --domain panel.example.com --email admin@example.com
+sudo bash install.sh --ip YOUR_VPS_IP --email admin@example.com --timezone Asia/Kathmandu
+sudo bash install.sh --source /root/panel --dir /opt/panasaurus --ip YOUR_VPS_IP --email admin@example.com
+```
+
+`--source` includes uncommitted files from a local checkout while excluding credentials and runtime data. Running the script from a checkout automatically uses that checkout. A standalone copy downloads the GitHub `main` branch; use `--ref` to choose another branch, tag, or commit. `--check` validates the inputs without installing packages or starting services. Run `bash install.sh --help` for all options.
+
+Manage the installed services with:
+
+```bash
+sudo /opt/panasaurus/panel ps
+sudo /opt/panasaurus/panel logs -f
+sudo /opt/panasaurus/panel restart panel
+sudo /opt/panasaurus/panel exec panel panasaurus -help
+```
+
+The initial credentials are also saved at `/opt/panasaurus/.local/vps/admin-credentials.txt`. SMTP defaults to local logging; configure a mail provider in `.local/vps/compose.yml` and recreate the panel container before using password-reset email. To back up the installation, retain the configuration (especially `APP_KEY`) and back up the persistent volumes, including a database dump. Wings is installed and connected separately when adding a node.
 
 ### Managing extensions
 
@@ -53,6 +72,8 @@ Or use the **Admin → Panasaurus → Marketplace** page to discover extensions 
 | Panasaurus CLI | `php artisan panasaurus:info` and `php artisan panasaurus:status` |
 | Docker everywhere | Multi-stage image, healthchecks, tini, tuned PHP-FPM + nginx + supervisor, queue worker, scheduler |
 | Performance | OPcache JIT + preloading, gzip, aggressive static caching, code-split assets |
+
+Bundled game templates use matching runtime and installer images from [`ghcr.io/panasaurus/images`](https://github.com/panasaurus/images). Upgrades migrate matching existing egg and server image settings while preserving custom images and installation scripts. Recreate or restart existing server containers to apply the new runtime. Mumble and legacy ARK retain their specialized external runtimes: the repository does not provide a Mumble image, and its Source image lacks the RCON helper used by the ARK template.
 
 ## Development
 

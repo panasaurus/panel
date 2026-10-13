@@ -9,9 +9,9 @@ const checkboxStyle = css<Props>`
     appearance: none;
     width: 1rem;
     height: 1rem;
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid #3b3b43;
     border-radius: 0.25rem;
-    background-color: rgba(255, 255, 255, 0.09);
+    background-color: #18181b;
     color-adjust: exact;
     background-origin: border-box;
     transition:
@@ -20,21 +20,21 @@ const checkboxStyle = css<Props>`
 
     &:checked {
         background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M5.707 7.293a1 1 0 0 0-1.414 1.414l2 2a1 1 0 0 0 1.414 0l4-4a1 1 0 0 0-1.414-1.414L7 8.586 5.707 7.293z'/%3e%3c/svg%3e");
-        background-color: #3b82f6;
-        border-color: #3b82f6;
+        background-color: #23d18d;
+        border-color: #23d18d;
         background-size: 100% 100%;
         background-position: center;
         background-repeat: no-repeat;
     }
 
     &:hover {
-        border-color: rgba(255, 255, 255, 0.3);
+        border-color: #52525b;
     }
 
     &:focus {
         outline: none;
-        box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25);
-        border-color: #3b82f6;
+        box-shadow: 0 0 0 3px rgba(35, 209, 141, 0.10);
+        border-color: #23d18d;
     }
 
     &:disabled {
@@ -44,20 +44,17 @@ const checkboxStyle = css<Props>`
 `;
 
 const inputStyle = css<Props>`
-    // Reset to normal styling.
     resize: none;
 
-    & + .input-help {
-    }
-
-    &:required,
-    &:invalid {
-    }
-
     &:not(:disabled):not(:read-only):focus {
+        border-color: #23d18d;
+        box-shadow: 0 0 0 3px rgba(35, 209, 141, 0.10);
     }
 
     &:disabled {
+        background-color: #111113;
+        color: #92929c;
+        opacity: 0.8;
     }
 
     padding-left: 1rem;
@@ -66,8 +63,13 @@ const inputStyle = css<Props>`
     padding-bottom: 0.5rem;
     border-radius: 0.5rem;
     outline: none;
-    background-color: rgba(255, 255, 255, 0.09); /* Converted the hex color with alpha to rgba */
-    font-size: 0.875rem; /* 14px */
+    border: 1px solid #3b3b43;
+    background-color: #18181b;
+    color: #f4f4f5;
+    &::placeholder {
+        color: #8d8d98 !important;
+    }
+    font-size: 0.875rem;
 `;
 
 const Input = styled.input<Props>`
@@ -78,9 +80,6 @@ const Input = styled.input<Props>`
     &[type='checkbox'],
     &[type='radio'] {
         ${checkboxStyle};
-
-        &[type='radio'] {
-        }
     }
 `;
 const Textarea = styled.textarea<Props>`

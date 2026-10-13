@@ -10,7 +10,6 @@ import asDialog from '@/hoc/asDialog';
 
 import { ServerContext } from '@/state/server';
 
-// TODO: Make it more pretty
 const CircleProgress = ({ progress, className }: { progress: number; className?: string }) => {
     const radius = 12;
     const circumference = 2 * Math.PI * radius;
@@ -60,7 +59,10 @@ const FileUploadList = () => {
                         <Tooltip.Root delayDuration={200}>
                             <Tooltip.Trigger asChild>
                                 <div className={'shrink-0'}>
-                                    <CircleProgress progress={(file.loaded / file.total) * 100} className={'w-6 h-6'} />
+                                    <CircleProgress
+                                        progress={(file.loaded / file.total) * 100}
+                                        className={'w-6 h-6'}
+                                    />
                                 </div>
                             </Tooltip.Trigger>
                             <Tooltip.Portal>
@@ -81,7 +83,7 @@ const FileUploadList = () => {
                                     variant='secondary'
                                     size='sm'
                                     onClick={cancelFileUpload.bind(this, name)}
-                                    className='hover:!text-red-400'
+                                    className='hover:!text-[#23d18d]'
                                 >
                                     <Xmark />
                                 </ActionButton>
@@ -89,7 +91,7 @@ const FileUploadList = () => {
                             <Tooltip.Portal>
                                 <Tooltip.Content
                                     side='right'
-                                    className='px-2 py-1 text-sm bg-gray-800 text-red-400 rounded shadow-lg z-9999'
+                                    className='px-2 py-1 text-sm bg-[#18181b] text-[#a1a1aa] rounded shadow-lg z-9999'
                                     sideOffset={5}
                                 >
                                     Cancel

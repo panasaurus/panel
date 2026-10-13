@@ -34,7 +34,10 @@ const Editor = lazy(() => import('@/components/elements/editor/Editor'));
 
 const FileEditContainer = () => {
     const [error, setError] = useState('');
-    const { action, '*': rawFilename } = useParams<{ action: 'edit' | 'new'; '*': string }>();
+    const { action, '*': rawFilename } = useParams<{
+        action: 'edit' | 'new';
+        '*': string;
+    }>();
     const [_, setLoading] = useState(action === 'edit');
     const [content, setContent] = useState('');
     const [modalVisible, setModalVisible] = useState(false);
@@ -75,7 +78,7 @@ const FileEditContainer = () => {
                 setError(httpErrorToHuman(error));
             })
             .then(() => setLoading(false));
-    }, [action, uuid, filename]);
+    }, [action, uuid, filename, setDirectory]);
 
     const save = (name?: string) => {
         return new Promise<void>((resolve, reject) => {
@@ -106,7 +109,6 @@ const FileEditContainer = () => {
         try {
             await save(name);
             if (instance) {
-                // they'll stack immediately, so this'll ease that
                 setTimeout(() => {
                     toast.success('Your server is restarting.');
                 }, 500);
@@ -122,14 +124,16 @@ const FileEditContainer = () => {
     }
 
     return (
-        <PageContentBlock title={action === 'edit' ? `Editing ${filename}` : `New File`} className='p-0! h-full'>
+        <PageContentBlock
+            title={action === 'edit' ? `Editing ${filename}` : `New File`}
+            className='client-file-editor'
+        >
             <FlashMessageRender byKey={'files:view'} />
 
             <ErrorBoundary>
                 <div
                     className={`flex py-6 bg-[#ffffff11] rounded-md rounded-b-none border-[1px] border-[#ffffff07] border-b-0`}
                 >
-                    <span className='-ml-[2rem]'></span>
                     <FileManagerBreadcrumbs withinFileEditor isNewFile={action !== 'edit'} />
                 </div>
             </ErrorBoundary>
@@ -138,11 +142,13 @@ const FileEditContainer = () => {
                 <div className={`mb-4 p-4 border-l-4 bg-neutral-900 rounded-sm border-cyan-400`}>
                     <p className={`text-neutral-300 text-sm`}>
                         You&apos;re editing a{' '}
-                        <code className={`font-mono bg-black rounded-sm py-px px-1`}>.pyroignore</code> file. Any files
-                        or directories listed in here will be excluded from backups. Wildcards are supported by using an
-                        asterisk (<code className={`font-mono bg-black rounded-sm py-px px-1`}>*</code>). You can negate
-                        a prior rule by prepending an exclamation point (
-                        <code className={`font-mono bg-black rounded-sm py-px px-1`}>!</code>).
+                        <code className={`font-mono bg-black rounded-sm py-px px-1`}>.pyroignore</code> file.
+                        Any files or directories listed in here will be excluded from backups. Wildcards are
+                        supported by using an asterisk (
+                        <code className={`font-mono bg-black rounded-sm py-px px-1`}>*</code>
+                        ). You can negate a prior rule by prepending an exclamation point (
+                        <code className={`font-mono bg-black rounded-sm py-px px-1`}>!</code>
+                        ).
                     </p>
                 </div>
             ) : null}
@@ -156,32 +162,16 @@ const FileEditContainer = () => {
                 }}
             />
 
-            <div className='h-full relative bg-[#ffffff11] border-[1px] border-[#ffffff07] border-t-0 [&>div>div]:h-full [&>div>div]:outline-hidden! w-full flex-grow'>
-                <Editor
-                    filename={filename}
-                    initialContent={content}
-                    language={language}
-                    onLanguageChanged={(l) => {
-                        setLanguage(l);
-                    }}
-                    fetchContent={(value) => {
-                        fetchFileContent = value;
-                    }}
-                    onContentSaved={() => {
-                        if (action !== 'edit') {
-                            setModalVisible(true);
-                        } else {
-                            save();
-                        }
-                    }}
-                    className='w-full h-full'
-                />
-            </div>
-
-            <div className='flex flex-row items-center gap-4 absolute top-2.5 right-2'>
+            <div className='client-file-editor-toolbar'>
                 <DropdownMenu>
                     <DropdownMenuTrigger className='flex items-center gap-2 font-bold text-sm px-3 py-1 rounded-md h-fit bg-[#ffffff11]'>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'>
+                        <svg
+                            xmlns='http://www.w3.org/2000/svg'
+                            width='24'
+                            height='24'
+                            viewBox='0 0 24 24'
+                            fill='none'
+                        >
                             <path
                                 d='M8 12H8.00897M11.9955 12H12.0045M15.991 12H16'
                                 stroke='currentColor'
@@ -205,7 +195,13 @@ const FileEditContainer = () => {
                             />
                         </svg>
                         <span className='sm:block hidden'>{language?.name ?? 'Language'}</span>
-                        <svg xmlns='http://www.w3.org/2000/svg' width='13' height='13' viewBox='0 0 13 13' fill='none'>
+                        <svg
+                            xmlns='http://www.w3.org/2000/svg'
+                            width='13'
+                            height='13'
+                            viewBox='0 0 13 13'
+                            fill='none'
+                        >
                             <path
                                 fillRule='evenodd'
                                 clipRule='evenodd'
@@ -286,6 +282,28 @@ const FileEditContainer = () => {
                         </ActionButton>
                     </Can>
                 )}
+            </div>
+
+            <div className='client-file-editor-body'>
+                <Editor
+                    filename={filename}
+                    initialContent={content}
+                    language={language}
+                    onLanguageChanged={(l) => {
+                        setLanguage(l);
+                    }}
+                    fetchContent={(value) => {
+                        fetchFileContent = value;
+                    }}
+                    onContentSaved={() => {
+                        if (action !== 'edit') {
+                            setModalVisible(true);
+                        } else {
+                            save();
+                        }
+                    }}
+                    className='w-full h-full'
+                />
             </div>
         </PageContentBlock>
     );

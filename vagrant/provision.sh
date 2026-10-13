@@ -77,7 +77,6 @@ usermod -a -G www-data vagrant
 
 systemctl enable --now php8.4-fpm
 
-# ensure CLI sees correct php version
 if ! php -v | grep -q "PHP 8.4"; then
   warn "CLI PHP is not 8.4 — forcing PHP 8.4 as system default"
 
@@ -85,7 +84,6 @@ if ! php -v | grep -q "PHP 8.4"; then
   update-alternatives --set phar /usr/bin/phar8.4
   update-alternatives --set phar.phar /usr/bin/phar.phar8.4
 
-  # re-check
   if ! php -v | grep -q "PHP 8.4"; then
     err "Failed to force PHP 8.4 as CLI default"
     php -v
@@ -96,7 +94,6 @@ if ! php -v | grep -q "PHP 8.4"; then
 else
   log "PHP CLI using 8.4"
 fi
-
 
 log Installing and configuring Nginx
 apt-get install -y nginx
@@ -199,14 +196,11 @@ chmod -R 755 storage bootstrap/cache
 setfacl -Rm u:vagrant:rwX storage bootstrap/cache >/dev/null 2>&1 || true
 chown -R vagrant:vagrant storage bootstrap/cache
 
-# helper (append --no-interaction automatically; avoid quoted, spaced values)
 artisan() {
   sudo -u vagrant -H bash -lc \
     "cd /home/vagrant/panasaurus && /usr/bin/php8.4 artisan $* --no-interaction"
 }
 
-
-# generate key only if empty/missing
 if ! grep -qE '^APP_KEY=base64:.+' .env; then
   artisan key:generate --force
 fi
@@ -226,14 +220,12 @@ fi
 mysql -u root -e "UPDATE panel.users SET root_admin = 1 WHERE email='dev@pyro.host'"
 
 log Ensuring location exists
-# ensure location and get its id
 if ! mysql -u root -D panel -N -B -e "SELECT id FROM locations WHERE short='local' LIMIT 1;" | grep -q .; then
   artisan p:location:make --short=local --long=Local || true
 fi
 LOCATION_ID=$(mysql -u root -D panel -N -B -e "SELECT id FROM locations WHERE short='local' LIMIT 1;")
 
 log Ensuring node exists
-# create node only if missing; avoid spaces in options
 if ! mysql -u root -D panel -N -B -e "SELECT id FROM nodes WHERE name='local' LIMIT 1;" | grep -q .; then
   artisan p:node:make \
     --name=local \
@@ -306,9 +298,6 @@ install -d -m 0755 /etc/pterodactyl
 install -d -m 0755 /etc/elytra
 if [ ! -f /usr/local/bin/elytra ]; then
   ARCH=$(uname -m); [[ $ARCH == x86_64 ]] && ARCH=amd64 || ARCH=arm64
-  # TODO: MAKE SURE TO MERGE https://github.com/BoredHF/elytra IT HAS THE FIXES FOR THE ELYTRA BINARY.
-  # Without it, the elytra binary won't work properly. You would need to jump through a few hoops
-  # post install by creating a pterodactyl user using "sudo useradd -M -s /sbin/nologin panasaurus" - Tyr
   curl -fsSL -o /usr/local/bin/elytra "https://github.com/pyrohost/elytra/releases/latest/download/elytra_linux_${ARCH}"
   chmod u+x /usr/local/bin/elytra
 else
@@ -364,13 +353,11 @@ if ! command -v minio >/dev/null 2>&1; then
   curl -fsSL -o /usr/local/bin/minio "https://dl.min.io/server/minio/release/linux-${ARCH}/minio"
   chmod +x /usr/local/bin/minio
 
-  # Create minio user and directories
   useradd -r minio-user || true
   mkdir -p /opt/minio/data
   mkdir -p /etc/minio
   chown minio-user:minio-user /opt/minio/data
 
-  # Create MinIO environment file
   cat >/etc/minio/minio.conf <<EOF
 MINIO_ROOT_USER=minioadmin
 MINIO_ROOT_PASSWORD=minioadmin
@@ -378,7 +365,6 @@ MINIO_VOLUMES=/opt/minio/data
 MINIO_OPTS="--console-address :9001"
 EOF
 
-  # Create systemd service
   cat >/etc/systemd/system/minio.service <<EOF
 [Unit]
 Description=MinIO
@@ -398,16 +384,12 @@ EnvironmentFile=/etc/minio/minio.conf
 ExecStartPre=/bin/bash -c 'if [ -z "\${MINIO_VOLUMES}" ]; then echo "Variable MINIO_VOLUMES not set in /etc/minio/minio.conf"; exit 1; fi'
 ExecStart=/usr/local/bin/minio server \$MINIO_OPTS \$MINIO_VOLUMES
 
-# Let systemd restart this service always
 Restart=always
 
-# Specifies the maximum file descriptor number that can be opened by this process
 LimitNOFILE=65536
 
-# Specifies the maximum number of threads this process can create
 TasksMax=infinity
 
-# Disable timeout logic and wait until process is stopped
 TimeoutStopSec=infinity
 SendSIGKILL=no
 
@@ -418,20 +400,16 @@ EOF
   systemctl daemon-reload
   systemctl enable --now minio
 
-  # Wait for MinIO to start
   sleep 5
 
-  # Create default buckets using mc (MinIO Client)
   curl -fsSL -o /usr/local/bin/mc "https://dl.min.io/client/mc/release/linux-${ARCH}/mc"
   chmod +x /usr/local/bin/mc
 
-  # Configure mc alias and create buckets
   sudo -u vagrant -H bash -c '
     /usr/local/bin/mc alias set local http://localhost:9000 minioadmin minioadmin
     /usr/local/bin/mc mb local/pterodactyl-backups --ignore-existing
   ' || true
 
-  # Configure MinIO in .env for rustic_s3 backups
   pushd /home/vagrant/panasaurus >/dev/null
 
   ENV_FILE=".env"
@@ -441,31 +419,25 @@ EOF
   else
     log "Configuring $ENV_FILE for MinIO (rustic_s3)"
 
-    # Ensure file ends with a newline to prevent concatenation when appending
     if [ -s "$ENV_FILE" ] && [ "$(tail -c1 "$ENV_FILE")" != $'\n' ]; then
       log "Adding missing trailing newline to $ENV_FILE"
       printf '\n' >> "$ENV_FILE"
     fi
 
-    # If APP_SERVICE_AUTHOR was written without a trailing newline and RUSTIC_S3 variables
-    # were appended immediately (e.g. ...\"dev@...\"RUSTIC_S3_...), insert a newline before RUSTIC_S3.
     if grep -q 'APP_SERVICE_AUTHOR=.*RUSTIC_S3' "$ENV_FILE" 2>/dev/null; then
       log "Fixing concatenated APP_SERVICE_AUTHOR + RUSTIC_S3 entries"
       sed -E -i 's/(APP_SERVICE_AUTHOR=.*)RUSTIC_S3/\1\nRUSTIC_S3/g' "$ENV_FILE"
     fi
 
-    # Helper: replace key if present, otherwise append key=value
     set_env_key() {
       local file="$1"; shift
       local key="$1"; local val="$2"
 
-      # Ensure trailing newline before appending
       if [ -s "$file" ] && [ "$(tail -c1 "$file")" != $'\n' ]; then
         printf '\n' >> "$file"
       fi
 
       if grep -qE "^${key}=" "$file"; then
-        # Replace existing line (preserve other lines)
         awk -v K="$key" -v V="$val" 'BEGIN{FS=OFS="="}
           $1==K { print K"="V; next }
           { print }
@@ -475,7 +447,6 @@ EOF
       fi
     }
 
-    # Set APP_BACKUP_DRIVER and all RUSTIC_S3_* keys idempotently
     set_env_key "$ENV_FILE" "APP_BACKUP_DRIVER" "rustic_s3"
     set_env_key "$ENV_FILE" "RUSTIC_S3_ENDPOINT" "http://localhost:9000"
     set_env_key "$ENV_FILE" "RUSTIC_S3_REGION" "us-east-1"
@@ -517,7 +488,6 @@ mysql -e "FLUSH PRIVILEGES;" 2>/dev/null || true
 
 cat > /etc/phpmyadmin/conf.d/99-custom.php << 'PHPEOF'
 <?php
-# Custom phpMyAdmin configuration for development
 $cfg['Servers'][$i]['AllowNoPassword'] = true;
 $cfg['Servers'][$i]['auth_type'] = 'cookie';
 $cfg['LoginCookieValidity'] = 3600;
@@ -564,10 +534,8 @@ if ! command -v mailpit >/dev/null 2>&1; then
   chmod +x /usr/local/bin/mailpit
   rm -f /tmp/mailpit.tar.gz
 
-  # Create mailpit user
   useradd -r mailpit-user || true
 
-  # Create systemd service
   cat >/etc/systemd/system/mailpit.service <<EOF
 [Unit]
 Description=Mailpit SMTP testing server
@@ -587,10 +555,8 @@ EOF
   systemctl daemon-reload
   systemctl enable --now mailpit
 
-  # Configure Mailpit in .env for mail testing
   pushd /home/vagrant/panasaurus >/dev/null
   if [ -f .env ]; then
-    # Set mail configuration for Mailpit
     if grep -q "^MAIL_MAILER=" .env; then
       sed -i '/^MAIL_MAILER=/c\MAIL_MAILER=smtp' .env
     else
@@ -675,20 +641,18 @@ if [ -n "${API_KEY:-}" ]; then
   echo API_KEY=$API_KEY >> /home/vagrant/.bashrc
   sleep 10
   log Creating Minecraft server
-  # Get the first allocation ID for this node
   ALLOCATION_ID=$(mysql -u root -D panel -N -B -e "SELECT id FROM allocations WHERE node_id=$NODE_ID LIMIT 1;" 2>/dev/null || echo "")
 
   if [ -z "$ALLOCATION_ID" ]; then
     warn "No allocations found for node $NODE_ID, skipping server creation"
   else
-    # Create a temporary server config with dynamic values in /tmp
     cat >/tmp/server_create.json <<EOF
 {
     "name": "Minecraft Vanilla Dev Server",
     "description": "Development Minecraft Vanilla Server with 4GB RAM, 32GB storage, 4 cores",
     "user": 1,
     "egg": 8,
-    "docker_image": "ghcr.io/pterodactyl/yolks:java_17",
+    "docker_image": "ghcr.io/panasaurus/images:java_17",
     "startup": "java -Xms128M -Xmx4096M -jar {{SERVER_JARFILE}}",
     "environment": {
         "SERVER_JARFILE": "server.jar",
@@ -723,7 +687,6 @@ if [ -n "${API_KEY:-}" ]; then
 }
 EOF
 
-    # Check if a Minecraft server already exists using Laravel
     pushd /home/vagrant/panasaurus >/dev/null
     EXISTING_SERVER_CHECK=$(sudo -u vagrant -H bash -lc '/usr/bin/php8.4 artisan tinker --execute="
 use Pterodactyl\Models\Server;
@@ -748,7 +711,6 @@ if (\$server) {
       fi
     else
       log "Waiting for API to be ready..."
-      # Wait for API to be accessible and test authentication
       for i in {1..30}; do
         API_TEST=$(curl -s -H "Authorization: Bearer $API_KEY" -H "Accept: Application/vnd.pterodactyl.v1+json" http://localhost:3000/api/application/users 2>/dev/null || echo "failed")
         if echo "$API_TEST" | grep -q '"object":"list"'; then
@@ -798,8 +760,6 @@ if (\$server) {
 else
   log API key already exists, skipping creation
 fi
-
-
 
 echo "======================================="
 echo "        Provisioning Complete"

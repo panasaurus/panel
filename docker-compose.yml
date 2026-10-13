@@ -10,8 +10,8 @@
 
 x-common:
     database: &db-environment
-        MYSQL_PASSWORD: &db-password 'CHANGE_ME_PLEASE'
-        MYSQL_ROOT_PASSWORD: 'CHANGE_ME_TOO_PLEASE'
+        MYSQL_PASSWORD: &db-password ${PANASAURUS_DB_PASSWORD:?Set PANASAURUS_DB_PASSWORD}
+        MYSQL_ROOT_PASSWORD: ${PANASAURUS_DB_ROOT_PASSWORD:?Set PANASAURUS_DB_ROOT_PASSWORD}
 
     panel: &panel-environment
         APP_URL: 'http://localhost'

@@ -26,9 +26,7 @@ use Pterodactyl\Http\Requests\Api\Client\Servers\Files\WriteFileContentRequest;
 
 class FileController extends ClientApiController
 {
-    /**
-     * FileController constructor.
-     */
+
     public function __construct(
         private NodeJWTService $jwtService,
         private DaemonFileRepository $fileRepository,
@@ -108,7 +106,7 @@ class FileController extends ClientApiController
      */
     public function write(WriteFileContentRequest $request, Server $server): JsonResponse
     {
-        $this->fileRepository->setServer($server)->putContent($request->get('file'), $request->getContent());
+        $this->fileRepository->setServer($server)->putContent($request->get('file'), $request->getContent(), $request->writeMode());
 
         Activity::event('server:file.write')->property('file', $request->get('file'))->log();
 

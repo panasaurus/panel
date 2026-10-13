@@ -35,9 +35,7 @@ use Pterodactyl\Http\Middleware\Api\Application\AuthenticateApplicationUser;
 
 class Kernel extends HttpKernel
 {
-    /**
-     * The application's global HTTP middleware stack.
-     */
+
     protected $middleware = [
         TrustProxies::class,
         HandleCors::class,
@@ -47,15 +45,8 @@ class Kernel extends HttpKernel
         ConvertEmptyStringsToNull::class,
     ];
 
-    /* protected $middlewarePriority = [ */
-    /*     SubstituteClientBindings::class, */
-    /* ]; */
-
-    /**
-     * The application's route middleware groups.
-     */
     protected $middlewareGroups = [
-        /* Blueprint extension framework middleware groups */
+
         'blueprint' => [
             EncryptCookies::class,
             AddQueuedCookiesToResponse::class,
@@ -66,6 +57,7 @@ class Kernel extends HttpKernel
             LanguageMiddleware::class,
         ],
         'blueprint/api' => [
+            EnsureStatefulRequests::class,
             'auth:sanctum',
             IsValidJson::class,
             TrackAPIKey::class,
@@ -91,10 +83,7 @@ class Kernel extends HttpKernel
             LanguageMiddleware::class,
         ],
         'api' => [
-            EncryptCookies::class,
-            AddQueuedCookiesToResponse::class,
-            /* StartSession::class, */
-            /* EnsureStatefulRequests::class, */
+            EnsureStatefulRequests::class,
             'auth:sanctum',
             IsValidJson::class,
             TrackAPIKey::class,
@@ -116,9 +105,6 @@ class Kernel extends HttpKernel
         ],
     ];
 
-    /**
-     * The application's route middleware.
-     */
     protected $middlewareAliases = [
         'auth' => Authenticate::class,
         'auth.basic' => AuthenticateWithBasicAuth::class,

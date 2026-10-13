@@ -17,21 +17,19 @@ const DownloadModrinth: React.FC<DownloadProps> = ({ url, serverUuid, directory 
         try {
             toast.info('Downloading file from Modrinth...');
 
-            // 1️⃣ Download the file from Modrinth
             const downloadResponse = await axios.get(url, {
                 responseType: 'blob',
             });
 
             const fileName = url.split('/').pop() || 'modrinth-file.jar';
+            const contentType = downloadResponse.headers['content-type'];
             const file = new Blob([downloadResponse.data], {
-                type: downloadResponse.headers['content-type'] || 'application/java-archive',
+                type: typeof contentType === 'string' ? contentType : 'application/java-archive',
             });
 
-            // 2️⃣ Prepare FormData for Upload
             const formData = new FormData();
             formData.append('files', file, fileName);
 
-            // 3️⃣ Upload to Panasaurus Server
             toast.info(`Uploading ${fileName} to server...`);
             await axios.post(`/api/client/servers/${serverUuid}/files/upload`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },

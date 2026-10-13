@@ -69,12 +69,11 @@ const blank_egg_prefix = '@';
 
 type FlowStep = 'overview' | 'select-game' | 'select-software' | 'configure' | 'review';
 
-// Laravel-style validation function
 const validateEnvironmentVariables = (variables: any[], pendingVariables: Record<string, string>): string[] => {
     const errors: string[] = [];
 
     variables.forEach((variable) => {
-        if (!variable.user_editable) return; // Skip non-editable variables
+        if (!variable.user_editable) return;
 
         const value = pendingVariables[variable.env_variable] || '';
         const rules = variable.rules || '';
@@ -83,22 +82,18 @@ const validateEnvironmentVariables = (variables: any[], pendingVariables: Record
             .map((rule) => rule.trim())
             .filter((rule) => rule.length > 0);
 
-        // Check if variable is required (backend automatically adds nullable if not present)
         const isRequired = ruleArray.includes('required');
         const isNullable = ruleArray.includes('nullable') || !isRequired;
 
-        // If required and empty/null
         if (isRequired && (!value || value.trim() === '')) {
             errors.push(`${variable.name} is required.`);
             return;
         }
 
-        // If nullable and empty, skip other validations
         if (isNullable && (!value || value.trim() === '')) {
             return;
         }
 
-        // Validate each rule
         ruleArray.forEach((rule) => {
             const [ruleName, ruleValue] = rule.split(':');
 
@@ -167,7 +162,6 @@ const validateEnvironmentVariables = (variables: any[], pendingVariables: Record
                 case 'regex': {
                     if (ruleValue && value) {
                         try {
-                            // Handle Laravel regex format: regex:/pattern/flags
                             const regexMatch = ruleValue.match(/^\/(.+)\/([gimuy]*)$/);
                             if (regexMatch) {
                                 const regex = new RegExp(regexMatch[1], regexMatch[2]);
@@ -175,8 +169,8 @@ const validateEnvironmentVariables = (variables: any[], pendingVariables: Record
                                     errors.push(`${variable.name} format is invalid.`);
                                 }
                             }
-                        } catch (e) {
-                            // Invalid regex - skip validation
+                        } catch {
+                            break;
                         }
                     }
                     break;
@@ -227,14 +221,12 @@ const validateEnvironmentVariables = (variables: any[], pendingVariables: Record
                     break;
                 }
 
-                // Skip validation rules that don't apply to frontend
                 case 'required':
                 case 'nullable':
                 case 'sometimes':
                     break;
 
                 default:
-                    // Unknown rule - log for debugging but don't error
                     if (
                         process.env.NODE_ENV === 'development' &&
                         !['string', 'array', 'file', 'image'].includes(ruleName)
@@ -254,14 +246,8 @@ const SoftwareContainer = () => {
     const daemonType = getGlobalDaemonType();
     const uuid = serverData?.uuid;
     const [nests, setNests] = useState<Nest[]>();
-    //const eggs = nests?.reduce(
-    //    (eggArray, nest) => [...eggArray, ...nest.attributes.relationships.eggs.data],
-    //    [] as Egg[],
-    //);
     const currentEgg = serverData?.egg;
-    //const originalEgg = currentEgg;
     const currentEggName = useMemo(() => {
-        // Don't attempt calculation until both nests data and currentEgg are available
         if (!nests || !currentEgg) {
             return undefined;
         }
@@ -278,7 +264,6 @@ const SoftwareContainer = () => {
     const { data: backups } = getServerBackups();
     const setServerFromState = ServerContext.useStoreActions((actions) => actions.server.setServerFromState);
 
-    // Flow state
     const [currentStep, setCurrentStep] = useState<FlowStep>('overview');
     const [isLoading, setIsLoading] = useState(false);
     const [selectedNest, setSelectedNest] = useState<Nest | null>(null);
@@ -293,16 +278,13 @@ const SoftwareContainer = () => {
     const [wipeLoading, setWipeLoading] = useState(false);
     const [shiftPressed, setShiftPressed] = useState(false);
 
-    // Configuration options
     const [shouldBackup, setShouldBackup] = useState(false);
     const [shouldWipe, setShouldWipe] = useState(false);
     const [showFullDescriptions, setShowFullDescriptions] = useState<Record<string, boolean>>({});
 
-    // Startup and Docker configuration
     const [customStartup, setCustomStartup] = useState('');
     const [selectedDockerImage, setSelectedDockerImage] = useState('');
 
-    // Data loading
     useEffect(() => {
         const fetchData = async () => {
             const data = await getNests();
@@ -335,15 +317,12 @@ const SoftwareContainer = () => {
         }));
     }, [data]);
 
-    // Initialize backup setting based on limits
     useEffect(() => {
         if (backups && backupLimit !== undefined) {
-            // null = unlimited, 0 = disabled, positive number = cap
             setShouldBackup(backupLimit !== 0 && (backupLimit === null || backups.backupCount < backupLimit));
         }
     }, [backups, backupLimit]);
 
-    // Countdown effect for wipe confirmation modal
     useEffect(() => {
         let interval: NodeJS.Timeout;
         if (showWipeConfirmation && wipeCountdown > 0) {
@@ -356,7 +335,6 @@ const SoftwareContainer = () => {
         };
     }, [showWipeConfirmation, wipeCountdown]);
 
-    // Reset countdown when wipe confirmation modal opens
     useEffect(() => {
         if (showWipeConfirmation) {
             setWipeCountdown(5);
@@ -381,7 +359,6 @@ const SoftwareContainer = () => {
         };
     });
 
-    // Flow control functions
     const resetFlow = () => {
         setCurrentStep('overview');
         setSelectedNest(null);
@@ -416,7 +393,6 @@ const SoftwareContainer = () => {
             const preview = await previewEggChange(uuid, egg.attributes.id, selectedNest.attributes.id);
             setEggPreview(preview);
 
-            // Check for subdomain compatibility warnings
             if (preview.warnings && preview.warnings.length > 0) {
                 const subdomainWarning = preview.warnings.find((w) => w.type === 'subdomain_incompatible');
                 if (subdomainWarning) {
@@ -427,7 +403,6 @@ const SoftwareContainer = () => {
                 }
             }
 
-            // Initialize variables with current values or defaults
             const initialVariables: Record<string, string> = {};
             preview.variables.forEach((variable) => {
                 const existingVar = data?.variables.find((v) => v.envVariable === variable.env_variable);
@@ -435,11 +410,8 @@ const SoftwareContainer = () => {
             });
             setPendingVariables(initialVariables);
 
-            // Set default startup command and docker image
             setCustomStartup(preview.egg.startup);
 
-            // Automatically select the default docker image if available
-            // Backend returns: {"Display Name": "actual/image:tag"}
             const availableDisplayNames = Object.keys(preview.docker_images || {});
             if (preview.default_docker_image && availableDisplayNames.includes(preview.default_docker_image)) {
                 setSelectedDockerImage(preview.default_docker_image);
@@ -459,7 +431,6 @@ const SoftwareContainer = () => {
     const handleVariableChange = (envVariable: string, value: string) => {
         setPendingVariables((prev) => ({ ...prev, [envVariable]: value }));
 
-        // Validate this specific variable in real-time and update errors
         if (eggPreview) {
             const variable = eggPreview.variables.find((v) => v.env_variable === envVariable);
             if (variable) {
@@ -484,13 +455,11 @@ const SoftwareContainer = () => {
     const applyChanges = async () => {
         if (!selectedEgg || !selectedNest || !eggPreview) return;
 
-        // Show final confirmation if wipe files is selected without backup
         if (shouldWipe && !shouldBackup) {
             setShowWipeConfirmation(true);
             return;
         }
 
-        // Proceed with the operation
         executeApplyChanges();
     };
 
@@ -500,14 +469,12 @@ const SoftwareContainer = () => {
         setIsLoading(true);
 
         try {
-            // Validate all variables using Laravel-style validation rules
             const validationErrors = validateEnvironmentVariables(eggPreview.variables, pendingVariables);
 
             if (validationErrors.length > 0) {
                 throw new Error(`Validation failed:\n${validationErrors.join('\n')}`);
             }
 
-            // Convert display name back to actual image for backend
             const actualDockerImage =
                 selectedDockerImage && eggPreview.docker_images
                     ? eggPreview.docker_images[selectedDockerImage]
@@ -515,7 +482,6 @@ const SoftwareContainer = () => {
                       ? eggPreview.docker_images[eggPreview.default_docker_image]
                       : '';
 
-            // Filter out empty environment variables to prevent validation issues
             const filteredEnvironment: Record<string, string> = {};
             Object.entries(pendingVariables).forEach(([key, value]) => {
                 if (value && value.trim() !== '') {
@@ -570,7 +536,6 @@ const SoftwareContainer = () => {
         if (operation.is_completed) {
             toast.success('Your software configuration has been applied successfully');
 
-            // Refresh server data to reflect changes
             mutate();
         } else if (operation.has_failed) {
             toast.error(operation.message || 'The software configuration change failed');
@@ -779,7 +744,7 @@ const SoftwareContainer = () => {
             <TitledGreyBox title={`Configure ${selectedEgg?.attributes.name}`}>
                 {eggPreview && (
                     <div className='space-y-6'>
-                        {/* Software Configuration */}
+
                         <div className='space-y-4'>
                             <h3 className='text-lg font-semibold text-neutral-200'>Software Configuration</h3>
                             <div className='grid grid-cols-1 xl:grid-cols-2 gap-4'>
@@ -861,7 +826,6 @@ const SoftwareContainer = () => {
                             </div>
                         </div>
 
-                        {/* Environment Variables */}
                         {eggPreview.variables.length > 0 && (
                             <div className='space-y-4'>
                                 <h3 className='text-lg font-semibold text-neutral-200'>Environment Variables</h3>
@@ -937,7 +901,6 @@ const SoftwareContainer = () => {
                             </div>
                         )}
 
-                        {/* Safety Options */}
                         <div className='space-y-4'>
                             <h3 className='text-lg font-semibold text-neutral-200'>Safety Options</h3>
                             <div className='space-y-3'>
@@ -1012,7 +975,7 @@ const SoftwareContainer = () => {
             <TitledGreyBox title='Review Changes'>
                 {selectedEgg && eggPreview && (
                     <div className='space-y-6'>
-                        {/* Summary */}
+
                         <div className='p-4 bg-[#ffffff08] border border-[#ffffff12] rounded-lg'>
                             <h3 className='text-lg font-semibold text-neutral-200 mb-4'>Change Summary</h3>
                             <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm'>
@@ -1039,7 +1002,6 @@ const SoftwareContainer = () => {
                             </div>
                         </div>
 
-                        {/* Startup Command Review */}
                         <div className='p-4 bg-[#ffffff08] border border-[#ffffff12] rounded-lg'>
                             <h3 className='text-lg font-semibold text-neutral-200 mb-4'>Startup Configuration</h3>
                             <div className='space-y-3'>
@@ -1058,7 +1020,6 @@ const SoftwareContainer = () => {
                             </div>
                         </div>
 
-                        {/* Configuration Review */}
                         {eggPreview.variables.length > 0 && (
                             <div className='p-4 bg-[#ffffff08] border border-[#ffffff12] rounded-lg'>
                                 <h3 className='text-lg font-semibold text-neutral-200 mb-4'>Variable Configuration</h3>
@@ -1085,7 +1046,6 @@ const SoftwareContainer = () => {
                             </div>
                         )}
 
-                        {/* Safety Options Review */}
                         <div className='p-4 bg-[#ffffff08] border border-[#ffffff12] rounded-lg'>
                             <h3 className='text-lg font-semibold text-neutral-200 mb-4'>Safety Options</h3>
                             <div className='space-y-2'>
@@ -1104,7 +1064,6 @@ const SoftwareContainer = () => {
                             </div>
                         </div>
 
-                        {/* Subdomain Warnings */}
                         {eggPreview.warnings && eggPreview.warnings.length > 0 && (
                             <div className='space-y-3'>
                                 {eggPreview.warnings.map((warning, index) => (
@@ -1143,7 +1102,6 @@ const SoftwareContainer = () => {
                             </div>
                         )}
 
-                        {/* General Warning */}
                         <div className='p-4 bg-amber-500/10 border border-amber-500/20 rounded-lg'>
                             <div className='flex items-start gap-3'>
                                 <TriangleExclamation
@@ -1190,7 +1148,6 @@ const SoftwareContainer = () => {
         </div>
     );
 
-    // Show loading state if server data is not available
     if (!serverData) {
         return (
             <ServerContentBlock title='Software Management'>
@@ -1233,13 +1190,8 @@ const SoftwareContainer = () => {
     return (
         <ServerContentBlock title='Software Management'>
             <div className='space-y-6'>
-                <MainPageHeader direction='column' title='Software Management'>
-                    <p className='text-neutral-400 leading-relaxed'>
-                        Change your server&apos;s game or software with our guided configuration wizard
-                    </p>
-                </MainPageHeader>
+                <MainPageHeader hideTitle direction='column' title='Software Management' />
 
-                {/* Progress indicator */}
                 {currentStep !== 'overview' && (
                     <div className='p-4 bg-[#ffffff08] border border-[#ffffff12] rounded-lg'>
                         <div className='flex items-center justify-between mb-2'>
@@ -1265,7 +1217,6 @@ const SoftwareContainer = () => {
                     </div>
                 )}
 
-                {/* Step Content */}
                 {currentStep === 'overview' && renderOverview()}
                 {currentStep === 'select-game' && renderGameSelection()}
                 {currentStep === 'select-software' && renderSoftwareSelection()}
@@ -1273,7 +1224,6 @@ const SoftwareContainer = () => {
                 {currentStep === 'review' && renderReview()}
             </div>
 
-            {/* Wipe Files Confirmation Modal */}
             <ConfirmationModal
                 title='Wipe All Files Without Backup?'
                 buttonText={wipeCountdown > 0 ? `Yes, Wipe Files (${wipeCountdown}s)` : 'Yes, Wipe Files'}
@@ -1317,7 +1267,6 @@ const SoftwareContainer = () => {
                 </div>
             </ConfirmationModal>
 
-            {/* Operation Progress Modal */}
             {RenderOperationModal()}
         </ServerContentBlock>
     );

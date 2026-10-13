@@ -12,7 +12,7 @@
         "subdomain_teamspeak"
     ],
     "docker_images": {
-        "ghcr.io\/pterodactyl\/yolks:debian": "ghcr.io\/pterodactyl\/yolks:debian"
+        "ghcr.io\/panasaurus\/images:debian": "ghcr.io\/panasaurus\/images:debian"
     },
     "file_denylist": [],
     "startup": ".\/ts3server default_voice_port={{SERVER_PORT}} query_port={{QUERY_PORT}} filetransfer_ip=0.0.0.0 filetransfer_port={{FILE_TRANSFER}} query_http_port={{QUERY_HTTP}} query_ssh_port={{QUERY_SSH}} query_protocols={{QUERY_PROTOCOLS_VAR}} serveradmin_password={{SERVERADMIN_PASSWORD}} license_accepted=1",
@@ -25,7 +25,7 @@
     "scripts": {
         "installation": {
             "script": "#!\/bin\/ash\r\n# TS3 Installation Script\r\n#\r\n# Server Files: \/mnt\/server\r\n\r\nif [ -z ${TS_VERSION} ] || [ ${TS_VERSION} == latest ]; then\r\n    TS_VERSION=$(curl -sSL https:\/\/teamspeak.com\/versions\/server.json | jq -r '.linux.x86_64.version')\r\nfi\r\n\r\ncd \/mnt\/server\r\n\r\necho -e \"getting files from http:\/\/files.teamspeak-services.com\/releases\/server\/${TS_VERSION}\/teamspeak3-server_linux_amd64-${TS_VERSION}.tar.bz2\" \r\ncurl -L http:\/\/files.teamspeak-services.com\/releases\/server\/${TS_VERSION}\/teamspeak3-server_linux_amd64-${TS_VERSION}.tar.bz2 | tar -xvj --strip-components=1\r\ncp .\/redist\/libmariadb.so.2 .\/",
-            "container": "ghcr.io\/pterodactyl\/installers:alpine",
+            "container": "ghcr.io\/panasaurus\/images:installer_alpine",
             "entrypoint": "ash"
         }
     },

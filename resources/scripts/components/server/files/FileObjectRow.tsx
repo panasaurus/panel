@@ -13,7 +13,6 @@ import { bytesToString } from '@/lib/formatters';
 
 import { FileObject } from '@/api/server/files/loadDirectory';
 
-// import FileDropdownMenu from '@/components/server/files/FileDropdownMenu';
 import { ServerContext } from '@/state/server';
 
 import { usePermissions } from '@/plugins/usePermissions';
@@ -43,42 +42,44 @@ const MemoizedClickable = memo(Clickable, isEqual);
 
 const FileObjectRow = ({ file }: { file: FileObject }) => (
     <ContextMenu>
-        <ContextMenuTrigger asChild>
-            <div className={styles.file_row} key={file.name}>
-                <SelectFileCheckbox name={file.name} />
-                <MemoizedClickable file={file}>
-                    <div className={`flex-none text-zinc-400 mr-4 text-lg pl-3 mb-0.5`}>
-                        {file.isFile ? (
-                            <div>
-                                <File width={22} height={22} />
+        <FileDropdownMenu file={file}>
+            {(actions) => (
+                <ContextMenuTrigger asChild>
+                    <div className={styles.file_row} key={file.name}>
+                        <SelectFileCheckbox name={file.name} />
+                        <MemoizedClickable file={file}>
+                            <div className={`flex-none text-zinc-400 mr-4 text-lg pl-3 mb-0.5`}>
+                                {file.isFile ? (
+                                    <div>
+                                        <File width={22} height={22} />
+                                    </div>
+                                ) : (
+                                    <div>
+                                        <FolderOpenFill width={22} height={22} />
+                                    </div>
+                                )}
                             </div>
-                        ) : (
-                            <div>
-                                <FolderOpenFill width={22} height={22} />
+                            <div className='flex-1 truncate font-bold text-sm'>{file.name}</div>
+                            {file.isFile && (
+                                <div className='w-1/6 text-right mr-4 hidden sm:block text-xs'>{bytesToString(file.size)}</div>
+                            )}
+                            <div className='w-1/5 text-right mr-4 hidden md:block text-xs' title={file.modifiedAt.toString()}>
+                                {Math.abs(differenceInHours(file.modifiedAt, new Date())) > 48
+                                    ? format(file.modifiedAt, 'MMM do, yyyy h:mma')
+                                    : formatDistanceToNow(file.modifiedAt, { addSuffix: true })}
                             </div>
-                        )}
+                        </MemoizedClickable>
+                        {actions}
                     </div>
-                    <div className='flex-1 truncate font-bold text-sm'>{file.name}</div>
-                    {file.isFile && (
-                        <div className='w-1/6 text-right mr-4 hidden sm:block text-xs'>{bytesToString(file.size)}</div>
-                    )}
-                    <div className='w-1/5 text-right mr-4 hidden md:block text-xs' title={file.modifiedAt.toString()}>
-                        {Math.abs(differenceInHours(file.modifiedAt, new Date())) > 48
-                            ? format(file.modifiedAt, 'MMM do, yyyy h:mma')
-                            : formatDistanceToNow(file.modifiedAt, { addSuffix: true })}
-                    </div>
-                </MemoizedClickable>
-            </div>
-        </ContextMenuTrigger>
-        <FileDropdownMenu file={file} />
+                </ContextMenuTrigger>
+            )}
+        </FileDropdownMenu>
     </ContextMenu>
 );
 
 export default memo(FileObjectRow, (prevProps, nextProps) => {
-    /* eslint-disable @typescript-eslint/no-unused-vars */
-    const { isArchiveType, isEditable, ...prevFile } = prevProps.file;
-    const { isArchiveType: nextIsArchiveType, isEditable: nextIsEditable, ...nextFile } = nextProps.file;
-    /* eslint-enable @typescript-eslint/no-unused-vars */
+    const { isArchiveType: _isArchiveType, isEditable: _isEditable, ...prevFile } = prevProps.file;
+    const { isArchiveType: _nextIsArchiveType, isEditable: _nextIsEditable, ...nextFile } = nextProps.file;
 
     return isEqual(prevFile, nextFile);
 });

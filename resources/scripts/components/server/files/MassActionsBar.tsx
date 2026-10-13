@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 
+import Can from '@/components/elements/Can';
 import ActionButton from '@/components/elements/ActionButton';
 import Spinner from '@/components/elements/Spinner';
 import SpinnerOverlay from '@/components/elements/SpinnerOverlay';
@@ -79,8 +80,8 @@ const MassActionsBar = () => {
                 >
                     <p className={'mb-2'}>
                         Are you sure you want to delete&nbsp;
-                        <span className={'font-semibold text-zinc-50'}>{selectedFiles.length} files</span>? This is a
-                        permanent action and the files cannot be recovered.
+                        <span className={'font-semibold text-zinc-50'}>{selectedFiles.length} files</span>?
+                        This is a permanent action and the files cannot be recovered.
                     </p>
                     {selectedFiles.slice(0, 15).map((file) => (
                         <li key={file}>{file}</li>
@@ -99,22 +100,46 @@ const MassActionsBar = () => {
                 <FadeTransition duration='duration-75' show={selectedFiles.length > 0} appear unmount>
                     <div
                         className={
-                            'pointer-events-none fixed bottom-0 left-0 right-0 mb-6 flex justify-center w-full z-50'
+                            'client-file-actions pointer-events-none fixed bottom-0 mb-6 flex justify-center z-50'
                         }
                     >
-                        <div className={`flex items-center space-x-4 pointer-events-auto rounded-sm p-4 bg-black/50`}>
-                            <ActionButton onClick={() => setShowMove(true)} disabled={loading}>
-                                {loading && loadingMessage.includes('Moving') && <Spinner size='small' />}
-                                Move
-                            </ActionButton>
-                            <ActionButton onClick={onClickCompress} disabled={loading}>
-                                {loading && loadingMessage.includes('Archiving') && <Spinner size='small' />}
-                                Archive
-                            </ActionButton>
-                            <ActionButton variant='danger' onClick={() => setShowConfirm(true)} disabled={loading}>
-                                {loading && loadingMessage.includes('Deleting') && <Spinner size='small' />}
-                                Delete
-                            </ActionButton>
+                        <div
+                            className={`flex flex-wrap items-center gap-2 pointer-events-auto rounded-xl border border-[#3f3f46] p-3 bg-[#101012]/95 shadow-xl`}
+                        >
+                            <Can action='file.update'>
+                                <ActionButton
+                                    variant='secondary'
+                                    onClick={() => setShowMove(true)}
+                                    disabled={loading}
+                                >
+                                    {loading && loadingMessage.includes('Moving') && <Spinner size='small' />}
+                                    Move
+                                </ActionButton>
+                            </Can>
+                            <Can action='file.archive'>
+                                <ActionButton
+                                    variant='secondary'
+                                    onClick={onClickCompress}
+                                    disabled={loading}
+                                >
+                                    {loading && loadingMessage.includes('Archiving') && (
+                                        <Spinner size='small' />
+                                    )}
+                                    Archive
+                                </ActionButton>
+                            </Can>
+                            <Can action='file.delete'>
+                                <ActionButton
+                                    variant='danger'
+                                    onClick={() => setShowConfirm(true)}
+                                    disabled={loading}
+                                >
+                                    {loading && loadingMessage.includes('Deleting') && (
+                                        <Spinner size='small' />
+                                    )}
+                                    Delete
+                                </ActionButton>
+                            </Can>
                         </div>
                     </div>
                 </FadeTransition>

@@ -7,6 +7,7 @@ export enum SocketEvent {
     CONSOLE_OUTPUT = 'console output',
     STATUS = 'status',
     STATS = 'stats',
+    HIBERNATION = 'hibernation',
     TRANSFER_LOGS = 'transfer logs',
     TRANSFER_STATUS = 'transfer status',
     BACKUP_COMPLETED = 'backup completed',

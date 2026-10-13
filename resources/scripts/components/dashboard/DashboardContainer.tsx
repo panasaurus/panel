@@ -1,266 +1,307 @@
-import { Bars, ChevronDown, House, LayoutCellsLarge, SlidersVertical } from '@gravity-ui/icons';
-import { useStoreState } from 'easy-peasy';
-import { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import useSWR from 'swr';
-
-import ServerRow from '@/components/dashboard/ServerRow';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
-} from '@/components/elements/DropdownMenu';
-import PageContentBlock from '@/components/elements/PageContentBlock';
-import Pagination from '@/components/elements/Pagination';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/elements/Tabs';
-import { PageListContainer } from '@/components/elements/pages/PageList';
+  ArrowUpRightFromSquare as ArrowUpRight,
+  Bars,
+  ChevronDown,
+  LayoutCellsLarge,
+  Magnifier,
+  SlidersVertical,
+  ArrowRotateRight,
+  Xmark,
+} from "@gravity-ui/icons";
+import { useStoreState } from "easy-peasy";
+import { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
+import useSWR from "swr";
 
-import getServers from '@/api/getServers';
-import { PaginatedResult } from '@/api/http';
-import { Server } from '@/api/server/getServer';
-
-import useFlash from '@/plugins/useFlash';
-import { usePersistedState } from '@/plugins/usePersistedState';
-
-import { MainPageHeader } from '../elements/MainPageHeader';
-import BlueprintGlobalBeforeSection from '@blueprint/components/Dashboard/Global/BeforeSection';
-import BlueprintGlobalAfterSection from '@blueprint/components/Dashboard/Global/AfterSection';
-import BlueprintServerlistBeforeContent from '@blueprint/components/Dashboard/Serverlist/BeforeContent';
-import BlueprintServerlistAfterContent from '@blueprint/components/Dashboard/Serverlist/AfterContent';
+import { SaurusMark } from "@/components/elements/PanasaurusLogo";
+import ServerRow from "@/components/dashboard/ServerRow";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/elements/DropdownMenu";
+import PageContentBlock from "@/components/elements/PageContentBlock";
+import Pagination from "@/components/elements/Pagination";
+import getServers from "@/api/getServers";
+import { type PaginatedResult } from "@/api/http";
+import { type Server } from "@/api/server/getServer";
+import useFlash from "@/plugins/useFlash";
+import { usePersistedState } from "@/plugins/usePersistedState";
+import BlueprintGlobalBeforeSection from "@blueprint/components/Dashboard/Global/BeforeSection";
+import BlueprintGlobalAfterSection from "@blueprint/components/Dashboard/Global/AfterSection";
+import BlueprintServerlistBeforeContent from "@blueprint/components/Dashboard/Serverlist/BeforeContent";
+import BlueprintServerlistAfterContent from "@blueprint/components/Dashboard/Serverlist/AfterContent";
 
 const DashboardContainer = () => {
-    const getTitle = () => {
-        if (serverViewMode === 'admin-all') return 'All Servers (Admin)';
-        if (serverViewMode === 'all') return 'All Accessible Servers';
-        return 'Your Servers';
-    };
+  const location = useLocation();
+  const defaultPage = Number(
+    new URLSearchParams(location.search).get("page") || "1",
+  );
+  const [page, setPage] = useState(
+    Number.isInteger(defaultPage) && defaultPage > 0 ? defaultPage : 1,
+  );
+  const [search, setSearch] = useState("");
+  const [query, setQuery] = useState("");
+  const searchField = useRef<HTMLInputElement>(null);
+  const user = useStoreState((state) => state.user.data!);
+  const { clearFlashes, clearAndAddHttpError } = useFlash();
+  const [serverViewMode, setServerViewMode] = usePersistedState<
+    "owner" | "admin-all" | "all"
+  >(`${user.uuid}:server_view_mode`, "owner");
+  const [display, setDisplay] = usePersistedState<"list" | "grid">(
+    `${user.uuid}:dashboard_display_option`,
+    "grid",
+  );
+  const view =
+    !user.rootAdmin && serverViewMode === "admin-all"
+      ? "owner"
+      : serverViewMode;
+  const viewLabel =
+    view === "admin-all"
+      ? "All servers (admin)"
+      : view === "all"
+        ? "All accessible servers"
+        : "Your servers";
+  const {
+    data: servers,
+    error,
+    mutate,
+    isValidating,
+  } = useSWR<PaginatedResult<Server>>(
+    ["/api/client/servers", view, page, query],
+    () => getServers({ page, type: view, query: query || undefined }),
+    { revalidateOnFocus: false },
+  );
 
-    const { search } = useLocation();
-    const defaultPage = Number(new URLSearchParams(search).get('page') || '1');
+  useEffect(() => {
+    if (search.trim() === query) return;
+    const timeout = window.setTimeout(() => {
+      setQuery(search.trim());
+      setPage(1);
+    }, 300);
+    return () => window.clearTimeout(timeout);
+  }, [search, query]);
 
-    const [page, setPage] = useState(!isNaN(defaultPage) && defaultPage > 0 ? defaultPage : 1);
-    const { clearFlashes, clearAndAddHttpError } = useFlash();
-    const uuid = useStoreState((state) => state.user.data!.uuid);
-    const rootAdmin = useStoreState((state) => state.user.data!.rootAdmin);
-    // const showOnlyAdmin = usePersistedState(`${uuid}:show_all_servers`, false);
+  useEffect(() => {
+    if (servers && servers.pagination.currentPage > 1 && !servers.items.length)
+      setPage(1);
+  }, [servers]);
 
-    const [serverViewMode, setServerViewMode] = usePersistedState<'owner' | 'admin-all' | 'all'>(
-        `${uuid}:server_view_mode`,
-        'owner',
-    );
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (page > 1) url.searchParams.set("page", String(page));
+    else url.searchParams.delete("page");
+    window.history.replaceState(window.history.state, "", url);
+  }, [page]);
 
-    const [dashboardDisplayOption, setDashboardDisplayOption] = usePersistedState(
-        `${uuid}:dashboard_display_option`,
-        'list',
-    );
-    const getApiType = (): string | undefined => {
-        if (serverViewMode === 'owner') return 'owner';
-        if (serverViewMode === 'admin-all') return 'admin-all';
-        if (serverViewMode === 'all') return 'all';
-        return undefined;
-    };
+  useEffect(() => {
+    if (location.state?.focusServerSearch) searchField.current?.focus();
+  }, [location.key, location.state]);
 
-    const { data: servers, error } = useSWR<PaginatedResult<Server>>(
-        ['/api/client/servers', serverViewMode, page],
-        () => getServers({ page, type: getApiType() }),
-        { revalidateOnFocus: false },
-    );
+  useEffect(() => {
+    if (error) clearAndAddHttpError({ key: "dashboard", error });
+    else clearFlashes("dashboard");
+  }, [error, clearAndAddHttpError, clearFlashes]);
 
-    useEffect(() => {
-        if (!servers) return;
-        if (servers.pagination.currentPage > 1 && !servers.items.length) {
-            setPage(1);
-        }
-    }, [servers?.pagination.currentPage]);
+  const changeView = (value: "owner" | "admin-all" | "all") => {
+    setPage(1);
+    setServerViewMode(value);
+  };
+  const count = servers?.pagination.total;
 
-    useEffect(() => {
-        // Don't use react-router to handle changing this part of the URL, otherwise it
-        // triggers a needless re-render. We just want to track this in the URL incase the
-        // user refreshes the page.
-        window.history.replaceState(null, document.title, `/${page <= 1 ? '' : `?page=${page}`}`);
-    }, [page]);
-
-    useEffect(() => {
-        if (error) clearAndAddHttpError({ key: 'dashboard', error });
-        if (!error) clearFlashes('dashboard');
-    }, [error]);
-
-    return (
-        <PageContentBlock title={'Dashboard'} showFlashKey={'dashboard'}>
-            <BlueprintGlobalBeforeSection />
-            <div className='w-full h-full min-h-full flex-1 flex flex-col px-2 sm:px-0'>
-                <Tabs
-                    defaultValue={dashboardDisplayOption}
-                    onValueChange={(value) => {
-                        setDashboardDisplayOption(value);
-                    }}
-                    className='w-full'
+  return (
+    <PageContentBlock
+      title="Your servers"
+      showFlashKey="dashboard"
+      className="client-dashboard-page"
+    >
+      <BlueprintGlobalBeforeSection />
+      <div className="client-page-intro">
+        <div>
+          <h1>Welcome back, {user.username}.</h1>
+          <p>Your servers, your people, your next adventure.</p>
+        </div>
+      </div>
+      <section
+        id="client-server-library"
+        className="client-server-library"
+        aria-labelledby="client-library-title"
+      >
+        <div className="client-library-heading">
+          <div>
+            <h2 id="client-library-title">Server library</h2>
+            <span
+              className="client-count"
+              aria-label={
+                count === undefined
+                  ? "Loading server count"
+                  : `${count} servers`
+              }
+            >
+              {count ?? "—"}
+            </span>
+          </div>
+          <span className="client-library-caption">
+            A little space. Endless possibilities.
+          </span>
+        </div>
+        <div className="client-library-toolbar">
+          <div className="client-server-search">
+            <Magnifier aria-hidden width={18} height={18} />
+            <input
+              ref={searchField}
+              id="client-server-search"
+              type="search"
+              placeholder="Search your servers…"
+              aria-label="Search servers"
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+            />
+            {search && (
+              <button
+                aria-label="Clear search"
+                onClick={() => {
+                  setSearch("");
+                  searchField.current?.focus();
+                }}
+              >
+                <Xmark aria-hidden width={16} height={16} />
+              </button>
+            )}
+          </div>
+          <div className="client-library-controls">
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="client-filter-button">
+                  <SlidersVertical aria-hidden width={16} height={16} />
+                  <span>{viewLabel}</span>
+                  <ChevronDown aria-hidden width={14} height={14} />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="client-dropdown" align="end">
+                <DropdownMenuItem onSelect={() => changeView("owner")}>
+                  Your servers
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => changeView("all")}>
+                  All accessible servers
+                </DropdownMenuItem>
+                {user.rootAdmin && (
+                  <DropdownMenuItem onSelect={() => changeView("admin-all")}>
+                    All servers (admin)
+                  </DropdownMenuItem>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <div
+              className="client-view-switch"
+              role="group"
+              aria-label="Server layout"
+            >
+              <button
+                aria-label="List view"
+                aria-pressed={display === "list"}
+                onClick={() => setDisplay("list")}
+              >
+                <Bars aria-hidden width={18} height={18} />
+              </button>
+              <button
+                aria-label="Grid view"
+                aria-pressed={display === "grid"}
+                onClick={() => setDisplay("grid")}
+              >
+                <LayoutCellsLarge aria-hidden width={18} height={18} />
+              </button>
+            </div>
+            <button
+              className={`client-icon-button ${isValidating ? "is-refreshing" : ""}`}
+              aria-label="Refresh servers"
+              disabled={isValidating}
+              onClick={() => void mutate()}
+            >
+              <ArrowRotateRight aria-hidden width={19} height={19} />
+            </button>
+          </div>
+        </div>
+        <BlueprintServerlistBeforeContent />
+        {error ? (
+          <div className="client-empty-state">
+            <h3>We couldn’t load your servers.</h3>
+            <p>Check your connection and try again.</p>
+            <button
+              className="client-secondary-button"
+              onClick={() => void mutate()}
+            >
+              Try again
+            </button>
+          </div>
+        ) : !servers ? (
+          <div className="client-loading" role="status">
+            <span className="client-loader" />
+            Loading your servers…
+          </div>
+        ) : (
+          <Pagination data={servers} onPageSelect={setPage}>
+            {({ items }) =>
+              items.length ? (
+                <div
+                  className={`client-server-collection ${display === "grid" ? "is-grid" : ""}`}
                 >
-                    <div
-                        className='transform-gpu skeleton-anim-2 mb-3 sm:mb-4'
-                        style={{
-                            animationDelay: '50ms',
-                            animationTimingFunction:
-                                'linear(0,0.01,0.04 1.6%,0.161 3.3%,0.816 9.4%,1.046,1.189 14.4%,1.231,1.254 17%,1.259,1.257 18.6%,1.236,1.194 22.3%,1.057 27%,0.999 29.4%,0.955 32.1%,0.942,0.935 34.9%,0.933,0.939 38.4%,1 47.3%,1.011,1.017 52.6%,1.016 56.4%,1 65.2%,0.996 70.2%,1.001 87.2%,1)',
-                        }}
-                    >
-                        <MainPageHeader
-                            title={getTitle()}
-                            titleChildren={
-                                <div className='flex gap-4'>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <button className='inline-flex h-9 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md bg-[#ffffff11] px-3 py-1.5 text-sm font-medium text-[#ffffff88] transition-all hover:bg-[#ffffff23] hover:text-[#ffffff] focus-visible:outline-hidden'>
-                                                <SlidersVertical width={20} height={21} color='white' />
-                                                <div>{getTitle()}</div>
-                                                <ChevronDown width={13} height={13} color='white' />
-                                            </button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent className='flex flex-col gap-1 z-99999' sideOffset={8}>
-                                            <DropdownMenuItem
-                                                onSelect={() => setServerViewMode('owner')}
-                                                className={serverViewMode === 'owner' ? 'bg-accent/20' : ''}
-                                            >
-                                                Your Servers Only
-                                            </DropdownMenuItem>
-
-                                            {rootAdmin && (
-                                                <>
-                                                    <DropdownMenuItem
-                                                        onSelect={() => setServerViewMode('admin-all')}
-                                                        className={serverViewMode === 'admin-all' ? 'bg-accent/20' : ''}
-                                                    >
-                                                        All Servers (Admin)
-                                                    </DropdownMenuItem>
-                                                </>
-                                            )}
-                                            <DropdownMenuItem
-                                                onSelect={() => setServerViewMode('all')}
-                                                className={serverViewMode === 'all' ? 'bg-accent/20' : ''}
-                                            >
-                                                All Servers
-                                            </DropdownMenuItem>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-
-                                    <TabsList>
-                                        <TabsTrigger aria-label='View servers in a list layout.' value='list'>
-                                            <Bars width={18} height={20} color='white' />
-                                        </TabsTrigger>
-                                        <TabsTrigger aria-label='View servers in a grid layout.' value='grid'>
-                                            <LayoutCellsLarge width={20} height={20} color='white' />
-                                        </TabsTrigger>
-                                    </TabsList>
-                                </div>
-                            }
-                        />
-                    </div>
-                    <BlueprintServerlistBeforeContent />
-                    {!servers ? (
-                        <div className='flex items-center justify-center py-12'>
-                            <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-brand'></div>
-                        </div>
-                    ) : (
-                        <>
-                            <TabsContent value='list'>
-                                <Pagination data={servers} onPageSelect={setPage}>
-                                    {({ items }) =>
-                                        items.length > 0 ? (
-                                            <PageListContainer>
-                                                {items.map((server, index) => (
-                                                    <div
-                                                        key={server.uuid}
-                                                        className='transform-gpu skeleton-anim-2'
-                                                        style={{
-                                                            animationDelay: `${index * 50 + 50}ms`,
-                                                            animationTimingFunction:
-                                                                'linear(0,0.01,0.04 1.6%,0.161 3.3%,0.816 9.4%,1.046,1.189 14.4%,1.231,1.254 17%,1.259,1.257 18.6%,1.236,1.194 22.3%,1.057 27%,0.999 29.4%,0.955 32.1%,0.942,0.935 34.9%,0.933,0.939 38.4%,1 47.3%,1.011,1.017 52.6%,1.016 56.4%,1 65.2%,0.996 70.2%,1.001 87.2%,1)',
-                                                        }}
-                                                    >
-                                                        <ServerRow
-                                                            className='flex-row'
-                                                            key={server.uuid}
-                                                            server={server}
-                                                        />
-                                                    </div>
-                                                ))}
-                                            </PageListContainer>
-                                        ) : (
-                                            <div className='flex flex-col items-center justify-center py-12 px-4'>
-                                                <div className='text-center'>
-                                                    <div className='w-16 h-16 mx-auto mb-4 rounded-full bg-[#ffffff11] flex items-center justify-center'>
-                                                        <House width={28} height={28} color='white' />
-                                                    </div>
-                                                    <h3 className='text-lg font-medium text-zinc-200 mb-2'>
-                                                        {serverViewMode === 'admin-all'
-                                                            ? 'No other servers found'
-                                                            : 'No servers found'}
-                                                    </h3>
-                                                    <p className='text-sm text-zinc-400 max-w-sm'>
-                                                        {serverViewMode === 'admin-all'
-                                                            ? 'There are no other servers to display.'
-                                                            : 'There are no servers associated with your account.'}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        )
-                                    }
-                                </Pagination>
-                            </TabsContent>
-                            <TabsContent value='grid'>
-                                <Pagination data={servers} onPageSelect={setPage}>
-                                    {({ items }) =>
-                                        items.length > 0 ? (
-                                            <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                                                {items.map((server, index) => (
-                                                    <div
-                                                        key={server.uuid}
-                                                        className='transform-gpu skeleton-anim-2'
-                                                        style={{
-                                                            animationDelay: `${index * 50 + 50}ms`,
-                                                            animationTimingFunction:
-                                                                'linear(0,0.01,0.04 1.6%,0.161 3.3%,0.816 9.4%,1.046,1.189 14.4%,1.231,1.254 17%,1.259,1.257 18.6%,1.236,1.194 22.3%,1.057 27%,0.999 29.4%,0.955 32.1%,0.942,0.935 34.9%,0.933,0.939 38.4%,1 47.3%,1.011,1.017 52.6%,1.016 56.4%,1 65.2%,0.996 70.2%,1.001 87.2%,1)',
-                                                        }}
-                                                    >
-                                                        <ServerRow
-                                                            className='items-start! flex-col w-full gap-4 [&>div~div]:w-full'
-                                                            key={server.uuid}
-                                                            server={server}
-                                                        />
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        ) : (
-                                            <div className='flex flex-col items-center justify-center py-12 px-4'>
-                                                <div className='text-center'>
-                                                    <div className='w-16 h-16 mx-auto mb-4 rounded-full bg-[#ffffff11] flex items-center justify-center'>
-                                                        <House width={28} height={28} color='white' />
-                                                    </div>
-                                                    <h3 className='text-lg font-medium text-zinc-200 mb-2'>
-                                                        {serverViewMode === 'admin-all'
-                                                            ? 'No other servers found'
-                                                            : 'No servers found'}
-                                                    </h3>
-                                                    <p className='text-sm text-zinc-400 max-w-sm'>
-                                                        {serverViewMode === 'admin-all'
-                                                            ? 'There are no other servers to display.'
-                                                            : 'There are no servers associated with your account.'}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        )
-                                    }
-                                </Pagination>
-                            </TabsContent>
-                        </>
-                    )}
-                </Tabs>
-                    <BlueprintServerlistAfterContent />
+                  {items.map((server) => (
+                    <ServerRow
+                      key={server.uuid}
+                      server={server}
+                      layout={display}
+                    />
+                  ))}
                 </div>
-                <BlueprintGlobalAfterSection />
-        </PageContentBlock>
-    );
+              ) : (
+                <div className="client-empty-state">
+                  <div className="client-empty-icon">
+                    <SaurusMark dead className="client-empty-saurus" />
+                  </div>
+                  <h3>{query ? "No matching servers." : "No servers yet"}</h3>
+                  {query && <p>Try a different name or clear your search.</p>}
+                  {query ? (
+                    <button
+                      className="client-secondary-button"
+                      onClick={() => setSearch("")}
+                    >
+                      Clear search
+                    </button>
+                  ) : user.rootAdmin ? (
+                    <a
+                      className="client-secondary-button"
+                      href="/admin/servers/new"
+                    >
+                      Create a server{" "}
+                      <ArrowUpRight aria-hidden width={16} height={16} />
+                    </a>
+                  ) : view !== "all" ? (
+                    <button
+                      className="client-secondary-button"
+                      onClick={() => changeView("all")}
+                    >
+                      Show all accessible servers
+                    </button>
+                  ) : (
+                    <button
+                      className="client-secondary-button"
+                      onClick={() => void mutate()}
+                    >
+                      Refresh servers
+                    </button>
+                  )}
+                </div>
+              )
+            }
+          </Pagination>
+        )}
+        <BlueprintServerlistAfterContent />
+      </section>
+      <BlueprintGlobalAfterSection />
+    </PageContentBlock>
+  );
 };
 
 export default DashboardContainer;

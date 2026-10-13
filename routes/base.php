@@ -8,6 +8,9 @@ Route::get('/', [Base\IndexController::class, 'index'])->name('index')->fallback
 Route::get('/account', [Base\IndexController::class, 'index'])
   ->withoutMiddleware(RequireTwoFactorAuthentication::class)
   ->name('account');
+Route::get('/account/security', [Base\IndexController::class, 'index'])
+  ->withoutMiddleware(RequireTwoFactorAuthentication::class)
+  ->name('account.security');
 
 Route::get('/locales/locale.json', Base\LocaleController::class)
   ->withoutMiddleware(['auth', RequireTwoFactorAuthentication::class])

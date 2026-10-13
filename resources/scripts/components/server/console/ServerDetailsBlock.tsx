@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from 'react';
 import StatBlock from '@/components/server/console/StatBlock';
 import { SocketEvent, SocketRequest } from '@/components/server/events';
 
-import { bytesToString, ip, mbToBytes } from '@/lib/formatters';
+import { bytesToString, ip } from '@/lib/formatters';
 
 import { SubdomainInfo, getSubdomainInfo } from '@/api/server/network/subdomain';
 
@@ -14,41 +14,19 @@ import useWebsocketEvent from '@/plugins/useWebsocketEvent';
 
 type Stats = Record<'memory' | 'cpu' | 'disk' | 'uptime' | 'rx' | 'tx', number>;
 
-// const getBackgroundColor = (value: number, max: number | null): string | undefined => {
-//     const delta = !max ? 0 : value / max;
-
-//     if (delta > 0.8) {
-//         if (delta > 0.9) {
-//             return 'bg-red-500';
-//         }
-//         return 'bg-yellow-500';
-//     }
-
-//     return undefined;
-// };
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const Limit = ({ limit, children }: { limit: string | null; children: React.ReactNode }) => <>{children}</>;
-
 const ServerDetailsBlock = ({ className }: { className?: string }) => {
     const [stats, setStats] = useState<Stats>({ memory: 0, cpu: 0, disk: 0, uptime: 0, tx: 0, rx: 0 });
     const [subdomainInfo, setSubdomainInfo] = useState<SubdomainInfo | null>(null);
 
     const status = ServerContext.useStoreState((state) => state.status.value);
+    const hibernation = ServerContext.useStoreState((state) => state.hibernation.value);
+    const offlineLabel = hibernation?.enabled && hibernation.sleeping
+        ? (hibernation.phase === 'waking' ? 'Waking up' : hibernation.phase === 'stopping' ? 'Saving' : 'Sleeping')
+        : 'Offline';
     const connected = ServerContext.useStoreState((state) => state.socket.connected);
     const instance = ServerContext.useStoreState((state) => state.socket.instance);
-    const limits = ServerContext.useStoreState((state) => state.server.data!.limits);
     const uuid = ServerContext.useStoreState((state) => state.server.data!.uuid);
     const serverAllocations = ServerContext.useStoreState((state) => state.server.data!.allocations);
-
-    const textLimits = useMemo(
-        () => ({
-            cpu: limits?.cpu ? `${limits.cpu}%` : null,
-            memory: limits?.memory ? bytesToString(mbToBytes(limits.memory)) : null,
-            disk: limits?.disk ? bytesToString(mbToBytes(limits.disk)) : null,
-        }),
-        [limits],
-    );
 
     const allocation = ServerContext.useStoreState((state) => {
         const match = state.server.data!.allocations.find((allocation) => allocation.isDefault);
@@ -56,7 +34,6 @@ const ServerDetailsBlock = ({ className }: { className?: string }) => {
         return !match ? 'n/a' : `${match.alias || ip(match.ip)}:${match.port}`;
     });
 
-    // Get display address (subdomain if available and active, otherwise IP)
     const displayAddress = useMemo(() => {
         if (
             subdomainInfo?.current_subdomain?.attributes?.is_active &&
@@ -72,8 +49,7 @@ const ServerDetailsBlock = ({ className }: { className?: string }) => {
             try {
                 const data = await getSubdomainInfo(uuid);
                 setSubdomainInfo(data);
-            } catch (error) {
-                // Silently fail - subdomain feature might not be available
+            } catch {
                 setSubdomainInfo(null);
             }
         };
@@ -93,7 +69,7 @@ const ServerDetailsBlock = ({ className }: { className?: string }) => {
         let stats: any = {};
         try {
             stats = JSON.parse(data);
-        } catch (e) {
+        } catch {
             return;
         }
 
@@ -131,9 +107,9 @@ const ServerDetailsBlock = ({ className }: { className?: string }) => {
             >
                 <StatBlock title={'CPU'}>
                     {status === 'offline' ? (
-                        <span className={'text-zinc-400'}>Offline</span>
+                        <span className={'text-zinc-400'}>{offlineLabel}</span>
                     ) : (
-                        <Limit limit={textLimits.cpu}>{stats.cpu.toFixed(2)}%</Limit>
+                        <>{stats.cpu.toFixed(2)}%</>
                     )}
                 </StatBlock>
             </div>
@@ -147,9 +123,9 @@ const ServerDetailsBlock = ({ className }: { className?: string }) => {
             >
                 <StatBlock title={'RAM'}>
                     {status === 'offline' ? (
-                        <span className={'text-zinc-400'}>Offline</span>
+                        <span className={'text-zinc-400'}>{offlineLabel}</span>
                     ) : (
-                        <Limit limit={textLimits.memory}>{bytesToString(stats.memory)}</Limit>
+                        bytesToString(stats.memory)
                     )}
                 </StatBlock>
             </div>
@@ -162,7 +138,7 @@ const ServerDetailsBlock = ({ className }: { className?: string }) => {
                 }}
             >
                 <StatBlock title={'Storage'}>
-                    <Limit limit={textLimits.disk}>{bytesToString(stats.disk)}</Limit>
+                    {bytesToString(stats.disk)}
                 </StatBlock>
             </div>
         </div>

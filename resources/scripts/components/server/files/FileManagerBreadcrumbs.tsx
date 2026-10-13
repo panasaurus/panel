@@ -26,7 +26,7 @@ const FileManagerBreadcrumbs = ({ renderLeft, withinFileEditor, isNewFile }: Pro
         if (withinFileEditor && params['*'] !== undefined && !isNewFile) {
             setFile(decodeURIComponent(params['*']).split('/').pop());
         }
-    }, [withinFileEditor, isNewFile]);
+    }, [withinFileEditor, isNewFile, params['*']]);
 
     const breadcrumbs = (): { name: string; path?: string }[] => {
         if (directory === '.') {
@@ -41,14 +41,20 @@ const FileManagerBreadcrumbs = ({ renderLeft, withinFileEditor, isNewFile }: Pro
                     return { name: directory };
                 }
 
-                return { name: directory, path: `/${dirs.slice(0, index + 1).join('/')}` };
+                return {
+                    name: directory,
+                    path: `/${dirs.slice(0, index + 1).join('/')}`,
+                };
             });
     };
 
     return (
         <div className={`group select-none flex grow-0 items-center text-sm overflow-x-hidden`}>
             {renderLeft || <div className={`w-12`} />}
-            <NavLink to={`/server/${id}/files`} className={`px-1 text-zinc-200 no-underline hover:text-zinc-100`}>
+            <NavLink
+                to={`/server/${id}/files`}
+                className={`px-1 text-zinc-200 no-underline hover:text-zinc-100`}
+            >
                 root
             </NavLink>
             <svg
@@ -78,7 +84,11 @@ const FileManagerBreadcrumbs = ({ renderLeft, withinFileEditor, isNewFile }: Pro
                             stroke='currentColor'
                             className='w-3 h-3'
                         >
-                            <path strokeLinecap='round' strokeLinejoin='round' d='m8.25 4.5 7.5 7.5-7.5 7.5' />
+                            <path
+                                strokeLinecap='round'
+                                strokeLinejoin='round'
+                                d='m8.25 4.5 7.5 7.5-7.5 7.5'
+                            />
                         </svg>
                     </Fragment>
                 ) : (

@@ -1,9 +1,4 @@
 #!/bin/bash
-# ----------------------------------------------------------------------------
-# Panasaurus container entrypoint
-# Prepares the environment, runs Blueprint's built-in bootstrapping, migrates
-# and caches the application, then hands off to supervisor.
-# ----------------------------------------------------------------------------
 set -e
 
 cd /app
@@ -11,7 +6,6 @@ cd /app
 log()  { printf '\033[1;32m[panasaurus]\033[0m %s\n' "$1"; }
 warn() { printf '\033[1;33m[panasaurus]\033[0m %s\n' "$1"; }
 
-# ---- 1. Application key -----------------------------------------------------
 if [ -z "$APP_KEY" ]; then
     log "No APP_KEY set — generating one.."
     APP_KEY="$(php -r 'echo "base64:".base64_encode(random_bytes(32));')"
@@ -19,7 +13,6 @@ if [ -z "$APP_KEY" ]; then
     warn "A generated APP_KEY is ephemeral. Set APP_KEY in your environment for stable encrypted data."
 fi
 
-# ---- 2. Wait for the database ----------------------------------------------
 if [ -n "$DB_HOST" ] && [ "$DB_HOST" != "localhost" ] && [ "$DB_HOST" != "127.0.0.1" ]; then
     log "Waiting for database at ${DB_HOST}:${DB_PORT:-3306}.."
     for _ in $(seq 1 60); do
@@ -39,17 +32,14 @@ if [ -n "$DB_HOST" ] && [ "$DB_HOST" != "localhost" ] && [ "$DB_HOST" != "127.0.
     done
 fi
 
-# ---- 3. First-boot install ---------------------------------------------------
 if [ ! -f /app/.panasaurus_bootstrapped ]; then
     log "First boot detected — running installer.."
 
     php artisan migrate --force || warn "Migrations failed — check database configuration."
     php artisan db:seed --class=BlueprintSeeder --force || true
 
-    # Blueprint: symlinks are pre-created in the image; ensure they exist.
     mkdir -p public/extensions public/assets/extensions
     ln -sfn /app/.blueprint/extensions/blueprint/public public/extensions/blueprint 2>/dev/null || true
-    ln -sfn /app/.blueprint/extensions/blueprint/assets public/assets/extensions/blueprint 2>/dev/null || true
     ln -sfn /app/scripts/libraries /app/.blueprint/lib 2>/dev/null || true
 
     if [ -n "$PANASAURUS_ADMIN_PASSWORD" ]; then
@@ -75,15 +65,22 @@ if [ ! -f /app/.panasaurus_bootstrapped ]; then
     log "First boot complete."
 fi
 
-# ---- 4. Run migrations on every boot (keeps versions in sync) ---------------
 log "Applying database migrations.."
 php artisan migrate --force || warn "Migration failed."
 
-# ---- 5. Blueprint engine boot -----------------------------------------------
+mkdir -p /app/public/assets/extensions
+for asset_directory in /app/.blueprint/extensions/*/assets; do
+    [ -d "$asset_directory" ] || continue
+    extension_id="$(basename "$(dirname "$asset_directory")")"
+    case "$extension_id" in ''|*[!a-zA-Z0-9_-]*) continue ;; esac
+    asset_link="/app/public/assets/extensions/$extension_id"
+    if [ -L "$asset_link" ] || [ ! -e "$asset_link" ]; then
+        ln -sfn "$asset_directory" "$asset_link"
+    fi
+done
+
 log "Blueprint engine ready ($(ls /app/.blueprint/extensions 2>/dev/null | wc -l) extension slot(s))."
 
-# ---- 6. Fix permissions for nginx -------------------------------------------
 chown -R nginx:nginx storage bootstrap/cache || true
 
-# ---- 7. Hand off --------------------------------------------------------------
 exec "$@"

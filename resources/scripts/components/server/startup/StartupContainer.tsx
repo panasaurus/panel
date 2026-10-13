@@ -111,7 +111,6 @@ const StartupContainer = () => {
 
         revertDockerImage(uuid)
             .then(() => {
-                // Get the first docker image from the egg as the default
                 const defaultImage = data ? (Object.values(data.dockerImages)[0] as string) || '' : '';
                 setServerFromState((s) => ({ ...s, dockerImage: defaultImage }));
                 setRevertModalVisible(false);
@@ -222,16 +221,7 @@ const StartupContainer = () => {
                 </div>
             </Dialog.Confirm>
             <div className='space-y-6'>
-                <MainPageHeader direction='column' title='Startup Settings'>
-                    <p className='text-sm text-neutral-400 leading-relaxed'>
-                        Configure how your server starts up. These settings control the startup command and environment
-                        variables.
-                        <span className='text-amber-400 font-medium'>
-                            {' '}
-                            Exercise caution when modifying these settings.
-                        </span>
-                    </p>
-                </MainPageHeader>
+                <MainPageHeader hideTitle direction='column' title='Startup Settings' />
 
                 <div className='space-y-6'>
                     <TitledGreyBox title={'Startup Command'} className='p-6'>

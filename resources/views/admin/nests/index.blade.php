@@ -25,7 +25,7 @@
         <div class="box">
             <div class="box-header with-border">
                 <h3 class="box-title">Configured Nests</h3>
-                <div class="box-tools">
+                <div class="box-tools admin-egg-actions">
                     <a href="#" class="btn btn-sm btn-success" data-toggle="modal" data-target="#importServiceOptionModal" role="button"><i class="fa fa-upload"></i> Import Egg</a>
                     <a href="#" class="btn btn-sm btn-success" data-toggle="modal" data-target="#importServiceOptionFromUrlModal" role="button"><i class="fa fa-upload"></i> Import Egg from URL</a>
                     <a href="{{ route('admin.nests.new') }}" class="btn btn-primary btn-sm">Create New</a>

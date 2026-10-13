@@ -119,6 +119,8 @@
 .admin-app .box-header.with-border { border-bottom: 1px solid var(--admin-border); }
 .admin-app .box-header .box-title { font: 600 15px/1.5 'Plus Jakarta Sans', sans-serif; }
 .admin-app .box-header > .box-tools { position: static !important; margin-left: auto; padding: 0; max-width: 100%; }
+.admin-app .admin-egg-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; }
+.admin-app .admin-egg-actions > .btn { min-height: 36px; margin: 0; padding: 8px 12px; white-space: nowrap; }
 .admin-app .box-body { padding: 22px; }
 .admin-app .box-body.no-padding { padding: 0; }
 .admin-app .box-footer { padding: 16px 22px; border-top: 1px solid var(--admin-border); background: #101012; border-radius: 0 0 10px 10px; }
@@ -331,6 +333,7 @@
     .admin-app .admin-panel, .admin-app .box { margin-bottom: 20px; }
     .admin-app .box-header { padding: 18px; }
     .admin-app .box-header > .box-tools { margin-left: 0; width: 100%; }
+    .admin-app .admin-egg-actions > .btn { flex: 1 0 auto; min-height: 42px; }
     .admin-app .box-body { padding: 18px; }
     .admin-app .admin-panel-header { padding: 18px; }
     .admin-app .admin-empty { padding: 36px 20px; }

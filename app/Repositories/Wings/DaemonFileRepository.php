@@ -55,13 +55,14 @@ class DaemonFileRepository extends DaemonRepository
      *
      * @throws DaemonConnectionException
      */
-    public function putContent(string $path, string $content): ResponseInterface
+    public function putContent(string $path, string $content, string $mode = 'write'): ResponseInterface
     {
         Assert::isInstanceOf($this->server, Server::class);
+        Assert::oneOf($mode, ['write', 'create', 'update']);
 
         try {
             return $this->getHttpClient()->post(
-                sprintf('/api/servers/%s/files/write', $this->server->uuid),
+                sprintf('/api/servers/%s/files/%s', $this->server->uuid, $mode),
                 [
                     'query' => ['file' => $path],
                     'body' => $content,
@@ -207,8 +208,7 @@ class DaemonFileRepository extends DaemonRepository
                         'root' => $root ?? '/',
                         'files' => $files,
                     ],
-                    // Wait for up to 15 minutes for the archive to be completed when calling this endpoint
-                    // since it will likely take quite awhile for large directories.
+
                     'timeout' => 60 * 15,
                 ]
             );
@@ -236,8 +236,7 @@ class DaemonFileRepository extends DaemonRepository
                         'root' => $root ?? '/',
                         'file' => $file,
                     ],
-                    // Wait for up to 15 minutes for the decompress to be completed when calling this endpoint
-                    // since it will likely take quite awhile for large directories.
+
                     'timeout' => 60 * 15,
                 ]
             );

@@ -18,6 +18,27 @@ import subusers from '@/state/server/subusers';
 
 export type ServerStatus = 'offline' | 'starting' | 'stopping' | 'running' | null;
 
+export interface HibernationStatus {
+    enabled: boolean;
+    sleeping?: boolean;
+    phase?: 'awake' | 'sleeping' | 'waking' | 'stopping';
+    players?: number | null;
+    idle_timeout_seconds?: number;
+    error?: string | null;
+}
+
+interface HibernationStore {
+    value: HibernationStatus | null;
+    setHibernation: Action<HibernationStore, HibernationStatus | null>;
+}
+
+const hibernation: HibernationStore = {
+    value: null,
+    setHibernation: action((state, payload) => {
+        if (!isEqual(state.value, payload)) state.value = payload;
+    }),
+};
+
 interface ServerDataStore {
     data?: Server;
     inConflictState: Computed<ServerDataStore, boolean>;
@@ -92,6 +113,7 @@ export interface ServerStore {
     schedules: ServerScheduleStore;
     socket: SocketStore;
     status: ServerStatusStore;
+    hibernation: HibernationStore;
     clearServerState: Action<ServerStore>;
 }
 
@@ -99,6 +121,7 @@ export const ServerContext: any = createContextStore<ServerStore>({
     server,
     socket,
     status,
+    hibernation,
     databases,
     files,
     subusers,
@@ -111,6 +134,8 @@ export const ServerContext: any = createContextStore<ServerStore>({
         state.files.directory = '/';
         state.files.selectedFiles = [];
         state.schedules.data = [];
+        state.status.value = null;
+        state.hibernation.value = null;
 
         if (state.socket.instance) {
             state.socket.instance.removeAllListeners();

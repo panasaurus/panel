@@ -17,8 +17,8 @@
 }
 
 .file_row {
-    @apply flex items-center border-[1px] border-[#ffffff07] bg-[#ffffff08] p-1 text-sm no-underline transition first:rounded-t-sm last:rounded-b-sm;
-    @apply hover:bg-[#ffffff12] hover:duration-0;
+    @apply flex h-full items-center border-[1px] border-[#27272a] bg-[#101012] p-1 text-sm no-underline transition first:rounded-t-sm last:rounded-b-sm;
+    @apply hover:bg-[#1c1c1f] hover:duration-0;
 
     & > .details {
         @apply flex flex-1 items-center truncate overflow-hidden px-4 py-2 text-zinc-300 no-underline;
@@ -29,10 +29,10 @@
     }
 
     &[data-state='open'] {
-        @apply bg-[#ffffff12];
+        @apply bg-[#1c1c1f];
     }
 
     &:has(button[data-state='checked']) {
-        @apply bg-[#2a2021];
+        @apply border-brand/25 bg-brand/10;
     }
 }

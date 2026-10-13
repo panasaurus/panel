@@ -8,18 +8,11 @@ use Illuminate\Support\Facades\Log;
 use Pterodactyl\Models\Server;
 use Pterodactyl\Models\ServerOperation;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
+use Symfony\Component\HttpKernel\Exception\ServiceUnavailableHttpException;
 
-/**
- * Middleware to rate limit server operations.
- *
- * Prevents concurrent operations on the same server and provides monitoring
- * of operation attempts for analytics and troubleshooting.
- */
 class ServerOperationRateLimit
 {
-    /**
-     * Handle an incoming request.
-     */
+
     public function handle(Request $request, Closure $next, string $operationType = 'general')
     {
         /** @var Server $server */
@@ -32,14 +25,11 @@ class ServerOperationRateLimit
         return $next($request);
     }
 
-    /**
-     * Check for active operations on the same server.
-     */
     private function checkActiveOperations(Server $server): void
     {
         try {
             if (!$this->tableExists('server_operations')) {
-                return;
+                throw new ServiceUnavailableHttpException(30, 'Server operation tracking is not initialized.');
             }
 
             $activeOperations = ServerOperation::forServer($server)->active()->count();
@@ -50,17 +40,17 @@ class ServerOperationRateLimit
                     'Another operation is currently in progress for this server. Please wait for it to complete.'
                 );
             }
+        } catch (TooManyRequestsHttpException $e) {
+            throw $e;
         } catch (\Exception $e) {
             Log::warning('Failed to check for active operations', [
                 'server_id' => $server->id,
                 'error' => $e->getMessage(),
             ]);
+            throw new ServiceUnavailableHttpException(30, 'Server operation checks are temporarily unavailable.', $e);
         }
     }
 
-    /**
-     * Check if a database table exists.
-     */
     private function tableExists(string $tableName): bool
     {
         try {
@@ -70,13 +60,10 @@ class ServerOperationRateLimit
                 'table' => $tableName,
                 'error' => $e->getMessage(),
             ]);
-            return false;
+            throw new ServiceUnavailableHttpException(30, 'Server operation checks are temporarily unavailable.', $e);
         }
     }
 
-    /**
-     * Log operation attempt for monitoring.
-     */
     private function logOperationAttempt(Server $server, $user, string $operationType): void
     {
         Log::info('Server operation attempt', [

@@ -4,6 +4,7 @@ namespace Pterodactyl\Repositories\Elytra;
 
 use Webmozart\Assert\Assert;
 use Pterodactyl\Models\Server;
+use Pterodactyl\Services\Nodes\NodeJWTService;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\TransferException;
 use Pterodactyl\Exceptions\Http\Connection\DaemonConnectionException;
@@ -137,7 +138,11 @@ class DaemonServerRepository extends DaemonRepository
     {
         Assert::isInstanceOf($this->server, Server::class);
 
-        $this->revokeJTIs([md5($id . $this->server->uuid)]);
+        $identity = $id . $this->server->uuid;
+        $this->revokeJTIs([
+            NodeJWTService::identifier($identity),
+            NodeJWTService::identifier($identity, 'md5'),
+        ]);
     }
 
     /**

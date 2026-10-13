@@ -31,14 +31,12 @@ const ServerActivityLogContainer = () => {
         revalidateOnFocus: false,
     });
 
-    // Extract unique event types for filter dropdown
     const eventTypes = useMemo(() => {
         if (!data?.items) return [];
         const types = [...new Set(data.items.map((item) => item.event))];
         return types.sort();
     }, [data?.items]);
 
-    // Filter data based on search term and event type
     const filteredData = useMemo(() => {
         if (!data?.items) return data;
 
@@ -58,7 +56,6 @@ const ServerActivityLogContainer = () => {
             filtered = filtered.filter((item) => item.event === selectedEventType);
         }
 
-        // Apply date range filtering
         if (dateRange !== 'all') {
             const now = new Date();
             const cutoff = new Date();
@@ -121,7 +118,6 @@ const ServerActivityLogContainer = () => {
     const hasActiveFilters =
         filters.filters?.event || filters.filters?.ip || searchTerm || selectedEventType || dateRange !== 'all';
 
-    // Keyboard shortcuts
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.ctrlKey || e.metaKey) {
@@ -164,6 +160,7 @@ const ServerActivityLogContainer = () => {
                     }}
                 >
                     <MainPageHeader
+                        hideTitle
                         direction='column'
                         title={'Activity Log'}
                         titleChildren={
@@ -190,12 +187,7 @@ const ServerActivityLogContainer = () => {
                                 </ActionButton>
                             </div>
                         }
-                    >
-                        <p className='text-sm text-neutral-400 leading-relaxed'>
-                            Monitor all server activity and track user actions. Filter events, search for specific
-                            activities, and export logs for audit purposes.
-                        </p>
-                    </MainPageHeader>
+                    />
                 </div>
 
                 {showFilters && (

@@ -25,9 +25,6 @@ class NodeJWTService
 
     private ?string $subject = null;
 
-    /**
-     * Set the claims to include in this JWT.
-     */
     public function setClaims(array $claims): self
     {
         $this->claims = $claims;
@@ -42,10 +39,6 @@ class NodeJWTService
         return $this;
     }
 
-    /**
-     * Attaches a user to the JWT being created and will automatically inject the
-     * "user_uuid" key into the final claims array with the user's UUID.
-     */
     public function setUser(User $user): self
     {
         $this->user = $user;
@@ -67,12 +60,14 @@ class NodeJWTService
         return $this;
     }
 
-    /**
-     * Generate a new JWT for a given node.
-     */
+    public static function identifier(?string $identifiedBy, string $algo = 'sha256'): string
+    {
+        return hash($algo, $identifiedBy ?? '');
+    }
+
     public function handle(Node $node, ?string $identifiedBy, string $algo = 'sha256'): Plain
     {
-        $identifier = hash($algo, $identifiedBy);
+        $identifier = self::identifier($identifiedBy, $algo);
         $config = Configuration::forSymmetricSigner(new Sha256(), InMemory::plainText($node->getDecryptedKey()));
 
         $builder = $config->builder(new TimestampDates())
@@ -95,18 +90,12 @@ class NodeJWTService
             $builder = $builder->withClaim($key, $value);
         }
 
-        // TODO: Add Assert
-        // Assert::notEmpty($this->scopes, 'Cannot generate a JWT without providing at least one scope.');
-
         $builder = $builder->withClaim('scope', implode(' ', array_map(fn ($scope) => $scope->value, $this->scopes)));
 
         if (!is_null($this->user)) {
             $builder = $builder
                 ->withClaim('user_uuid', $this->user->uuid)
-                // The "user_id" claim is deprecated and should not be referenced — it remains
-                // here solely to ensure older versions of Wings are unaffected when the Panel
-                // is updated.
-                //
+
                 // This claim will be removed in Panel@1.11 or later.
                 ->withClaim('user_id', $this->user->id);
         }

@@ -4,23 +4,16 @@ namespace Pterodactyl\Services\ServerOperations;
 
 use Exception;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Pterodactyl\Models\Server;
 use Pterodactyl\Models\ServerOperation;
 use Pterodactyl\Models\User;
 use Symfony\Component\HttpKernel\Exception\ConflictHttpException;
 
-/**
- * Service for managing server operations lifecycle.
- *
- * Handles creation, tracking, and cleanup of long-running server operations
- * like egg changes, reinstalls, and backup restores.
- */
 class ServerOperationService
 {
-    /**
-     * Check if server can accept new operations.
-     */
+
     public function canAcceptOperation(Server $server): bool
     {
         try {
@@ -31,14 +24,11 @@ class ServerOperationService
                 'server_id' => $server->id,
                 'error' => $e->getMessage(),
             ]);
-            
-            return true;
+
+            return false;
         }
     }
 
-    /**
-     * Create a new server operation.
-     */
     public function createOperation(
         Server $server,
         User $user,
@@ -46,26 +36,26 @@ class ServerOperationService
         array $parameters = [],
         ?string $message = null
     ): ServerOperation {
-        if (!$this->canAcceptOperation($server)) {
-            throw new ConflictHttpException('Server cannot accept new operations at this time.');
-        }
+        return DB::transaction(function () use ($server, $user, $type, $parameters, $message) {
+            Server::query()->withoutEagerLoads()->whereKey($server->id)->lockForUpdate()->firstOrFail();
+            if (!$this->canAcceptOperation($server)) {
+                throw new ConflictHttpException('Server cannot accept new operations at this time.');
+            }
 
-        $operationId = Str::uuid()->toString();
+            $operationId = Str::uuid()->toString();
 
-        return ServerOperation::create([
-            'operation_id' => $operationId,
-            'server_id' => $server->id,
-            'user_id' => $user->id,
-            'type' => $type,
-            'status' => ServerOperation::STATUS_PENDING,
-            'message' => $message ?? 'Operation queued for processing...',
-            'parameters' => $parameters,
-        ]);
+            return ServerOperation::create([
+                'operation_id' => $operationId,
+                'server_id' => $server->id,
+                'user_id' => $user->id,
+                'type' => $type,
+                'status' => ServerOperation::STATUS_PENDING,
+                'message' => $message ?? 'Operation queued for processing...',
+                'parameters' => $parameters,
+            ]);
+        });
     }
 
-    /**
-     * Get operation by ID for server.
-     */
     public function getOperation(Server $server, string $operationId): ServerOperation
     {
         $operation = ServerOperation::where('operation_id', $operationId)
@@ -79,9 +69,6 @@ class ServerOperationService
         return $operation;
     }
 
-    /**
-     * Get recent operations for server.
-     */
     public function getServerOperations(Server $server, int $limit = 20): array
     {
         $this->updateTimedOutOperations($server);
@@ -96,14 +83,11 @@ class ServerOperationService
         })->toArray();
     }
 
-    /**
-     * Update timed out operations for a server.
-     */
     public function updateTimedOutOperations(Server $server): int
     {
         try {
             $timedOutOperations = ServerOperation::forServer($server)->timedOut()->get();
-            
+
             foreach ($timedOutOperations as $operation) {
                 $operation->markAsFailed('Operation timed out');
             }
@@ -114,14 +98,11 @@ class ServerOperationService
                 'server_id' => $server->id,
                 'error' => $e->getMessage(),
             ]);
-            
+
             return 0;
         }
     }
 
-    /**
-     * Format operation for API response.
-     */
     public function formatOperationResponse(ServerOperation $operation): array
     {
         return [
@@ -140,17 +121,14 @@ class ServerOperationService
         ];
     }
 
-    /**
-     * Clean up old completed operations.
-     */
-    public function cleanupOldOperations(int $daysOld = null): int
+    public function cleanupOldOperations(?int $daysOld = null): int
     {
         $daysOld = $daysOld ?? config('server_operations.cleanup.retain_days', 30);
         $chunkSize = config('server_operations.cleanup.chunk_size', 100);
 
         try {
             $deletedCount = 0;
-            
+
             ServerOperation::forCleanup($daysOld)
                 ->chunk($chunkSize, function ($operations) use (&$deletedCount) {
                     foreach ($operations as $operation) {
@@ -165,7 +143,7 @@ class ServerOperationService
                 'error' => $e->getMessage(),
                 'days_old' => $daysOld,
             ]);
-            
+
             return 0;
         }
     }

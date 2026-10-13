@@ -58,6 +58,7 @@ const UsersContainer = () => {
             <ServerContentBlock title={'Users'}>
                 <FlashMessageRender byKey={'users'} />
                 <MainPageHeader
+                    hideTitle
                     direction='column'
                     title={'Users'}
                     titleChildren={
@@ -75,12 +76,7 @@ const UsersContainer = () => {
                             </Can>
                         </div>
                     }
-                >
-                    <p className='text-sm text-neutral-400 leading-relaxed'>
-                        Manage user access to your server. Grant specific permissions to other users to help you manage
-                        and maintain your server.
-                    </p>
-                </MainPageHeader>
+                />
                 <div className='flex items-center justify-center py-12'>
                     <div className='animate-spin rounded-full h-8 w-8 border-b-2 border-brand'></div>
                 </div>
@@ -93,6 +89,7 @@ const UsersContainer = () => {
             <BlueprintBeforeContent />
             <FlashMessageRender byKey={'users'} />
             <MainPageHeader
+                hideTitle
                 direction='column'
                 title={'Users'}
                 titleChildren={
@@ -110,12 +107,7 @@ const UsersContainer = () => {
                         </Can>
                     </div>
                 }
-            >
-                <p className='text-sm text-neutral-400 leading-relaxed'>
-                    Manage user access to your server. Grant specific permissions to other users to help you manage and
-                    maintain your server.
-                </p>
-            </MainPageHeader>
+            />
             {!subusers.length ? (
                 <div className='flex flex-col items-center justify-center min-h-[60vh] py-12 px-4'>
                     <div className='text-center'>

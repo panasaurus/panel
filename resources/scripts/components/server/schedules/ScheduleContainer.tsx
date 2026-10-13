@@ -45,6 +45,7 @@ function ScheduleContainer() {
             <BlueprintBeforeContent />
             <FlashMessageRender byKey={'schedules'} />
             <MainPageHeader
+                hideTitle
                 direction='column'
                 title={'Schedules'}
                 titleChildren={
@@ -54,12 +55,7 @@ function ScheduleContainer() {
                         </ActionButton>
                     </Can>
                 }
-            >
-                <p className='text-sm text-neutral-400 leading-relaxed'>
-                    Automate server tasks with scheduled commands. Create recurring tasks to manage your server, run
-                    backups, or execute custom commands.
-                </p>
-            </MainPageHeader>
+            />
             <Can action={'schedule.create'}>
                 <EditScheduleModal visible={visible} onModalDismissed={() => setVisible(false)} />
             </Can>

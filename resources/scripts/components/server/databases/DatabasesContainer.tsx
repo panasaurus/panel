@@ -11,7 +11,7 @@ import Field from '@/components/elements/Field';
 import { MainPageHeader } from '@/components/elements/MainPageHeader';
 import Modal from '@/components/elements/Modal';
 import ServerContentBlock from '@/components/elements/ServerContentBlock';
-import { PageListContainer, PageListItem } from '@/components/elements/pages/PageList';
+import { PageListContainer } from '@/components/elements/pages/PageList';
 import DatabaseRow from '@/components/server/databases/DatabaseRow';
 
 import { httpErrorToHuman } from '@/api/http';
@@ -90,6 +90,7 @@ const DatabasesContainer = () => {
             <BlueprintBeforeContent />
             <FlashMessageRender byKey={'databases'} />
             <MainPageHeader
+                hideTitle
                 direction='column'
                 title={'Databases'}
                 titleChildren={
@@ -116,12 +117,7 @@ const DatabasesContainer = () => {
                         </div>
                     </Can>
                 }
-            >
-                <p className='text-sm text-neutral-400 leading-relaxed'>
-                    Create and manage MySQL databases for your server. Configure database access, manage users, and view
-                    connection details.
-                </p>
-            </MainPageHeader>
+            />
 
             <Formik
                 onSubmit={submitDatabase}
