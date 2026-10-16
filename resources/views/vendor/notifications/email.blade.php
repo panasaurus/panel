@@ -71,6 +71,7 @@ $style = [
                     <tr>
                         <td style="{{ $style['email-masthead'] }}">
                             <a style="{{ $fontFamily }} {{ $style['email-masthead_name'] }}" href="{{ url('/') }}" target="_blank">
+                                <img src="{{ asset('assets/branding/panasaurus-logo.png') }}?v=20261016" width="64" height="42" alt="" style="display:block;margin:0 auto 12px;border:0;" />
                                 {{ config('app.name') }}
                             </a>
                         </td>

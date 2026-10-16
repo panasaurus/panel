@@ -23,19 +23,7 @@
 @endphp
 <header class="main-header">
     <a href="{{ route('admin.index') }}" class="logo" aria-label="{{ config('app.name') }} administration">
-        <svg width="30" height="30" viewBox="0 0 48 48" fill="none" aria-hidden="true">
-            <g fill="#23d18d">
-                <path d="M4 41 L13 31.5 L18.5 37 L11 45 Q6.5 46.5 4 41 Z" />
-                <rect x="11.5" y="21" width="22.5" height="15.5" rx="7.75" />
-                <circle cx="18" cy="30.5" r="6" />
-                <rect x="27.5" y="11.5" width="10.5" height="17" rx="5.25" />
-                <rect x="30.5" y="10.5" width="14" height="9.5" rx="4.25" />
-                <rect x="38" y="16" width="6.5" height="4.5" rx="2.25" />
-                <rect x="14" y="33" width="5" height="10.5" rx="2.5" />
-                <rect x="24.5" y="33" width="5" height="10.5" rx="2.5" />
-            </g>
-            <circle cx="37.8" cy="14.4" r="1.35" fill="#09090b" />
-        </svg>
+        <img src="{{ asset('assets/branding/panasaurus-logo.png') }}?v=20261016" width="36" height="30" alt="" aria-hidden="true" style="object-fit:contain;flex-shrink:0" />
         <span class="logoText">{{ config('app.name', 'Panasaurus') }}</span>
     </a>
     <nav class="navbar navbar-static-top" aria-label="Workspace controls">

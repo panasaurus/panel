@@ -13,12 +13,12 @@
             <meta name="csrf-token" content="{{ csrf_token() }}">
             <meta name="robots" content="noindex">
 
-            <link rel="icon" type="image/png" href="/favicons/favicon-96x96.png" sizes="96x96" />
-            <link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg" />
-            <link rel="shortcut icon" href="/favicons/favicon.ico" />
-            <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png" />
+            <link rel="icon" type="image/png" href="/favicons/favicon-96x96.png?v=20261016" sizes="96x96" />
+            <link rel="icon" type="image/svg+xml" href="/favicons/favicon.svg?v=20261016" />
+            <link rel="shortcut icon" href="/favicons/favicon.ico?v=20261016" />
+            <link rel="apple-touch-icon" sizes="180x180" href="/favicons/apple-touch-icon.png?v=20261016" />
             <meta name="apple-mobile-web-app-title" content="Panasaurus" />
-            <link rel="manifest" href="/favicons/site.webmanifest" />
+            <link rel="manifest" href="/favicons/site.webmanifest?v=20261016" />
 
             <meta name="theme-color" content="#000000">
             <meta name="darkreader-lock">

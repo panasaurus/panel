@@ -1,3 +1,5 @@
+<p align="center"><img src="public/assets/branding/panasaurus-logo.png" alt="Panasaurus" width="160" /></p>
+
 ![Discord](https://img.shields.io/discord/1558521816010465322?label=Discord&logo=Discord&logoColor=white)
 
 # Panasaurus Panel
