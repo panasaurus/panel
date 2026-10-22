@@ -57,9 +57,12 @@ jobs:
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: '8.4.27'
           extensions: bcmath, gd, mbstring, pdo_mysql, zip, opcache
           coverage: none
+
+      - name: Verify PHP security baseline
+        run: php scripts/check-php-version.php
 
       - name: Install dependencies
         run: composer install --prefer-dist --no-interaction --no-progress
@@ -86,7 +89,7 @@ jobs:
 
       - uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.4'
+          php-version: '8.4.27'
           coverage: none
 
       - name: PHP CS Fixer (dry)
@@ -113,6 +116,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
+          pull: true
           push: false
           tags: panasaurus/panel:ci
           cache-from: type=gha

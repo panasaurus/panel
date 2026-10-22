@@ -3,6 +3,9 @@ set -e
 
 cd /app
 
+# Fail before application startup if an old runtime is used.
+php /app/scripts/check-php-version.php
+
 log()  { printf '\033[1;32m[panasaurus]\033[0m %s\n' "$1"; }
 warn() { printf '\033[1;33m[panasaurus]\033[0m %s\n' "$1"; }
 

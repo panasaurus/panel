@@ -22,7 +22,7 @@ RUN pnpm install --frozen-lockfile --offline \
     && rm -rf node_modules
 
 # ---------- Stage 2: PHP runtime -------------------------------------------
-FROM --platform=$TARGETOS/$TARGETARCH php:8.4-fpm-alpine AS runtime
+FROM --platform=$TARGETOS/$TARGETARCH php:8.4.27-fpm-alpine AS runtime
 
 ARG VERSION=local
 ENV VERSION=${VERSION}
@@ -88,6 +88,9 @@ COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 COPY --chown=nginx:nginx . .
 COPY --from=frontend --chown=nginx:nginx /app/public/build ./public/build
 COPY --from=frontend --chown=nginx:nginx /app/public/assets ./public/assets
+
+# Reject vulnerable interpreters before installing application dependencies.
+RUN php scripts/check-php-version.php
 
 # PHP dependencies (production)
 RUN COMPOSER_ALLOW_SUPERUSER=1 composer install --no-dev --optimize-autoloader --no-interaction --no-progress
