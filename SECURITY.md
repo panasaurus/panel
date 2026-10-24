@@ -2,7 +2,7 @@
 
 ## Reporting a vulnerability
 
-Please report security vulnerabilities to **security@panasaurus.dev** rather than
+Please report security vulnerabilities to **security@panasaurus.com** rather than
 opening a public issue. Include a description, reproduction steps, and affected
 versions. You can expect an initial response within 72 hours.
 
